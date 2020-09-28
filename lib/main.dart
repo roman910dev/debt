@@ -105,7 +105,11 @@ updateData() async {
   prefs.setStringList('dexpr', dexpr);
   prefs.setString('theme', theme.value);
   prefs.setBool('showAds', showAds);
-  prefs.setString('currencySymbol', localCurrency ? null : currency.moneyFormatterSettings.symbol);
+  if (Currencies.majors.values.contains(currency)) {
+    prefs.setString('currencySymbol', localCurrency ? null : currency.symbol);
+  } else {
+    prefs.setString('currencySymbol', '${currency.symbolSide == SymbolSide.left ? 'l' : 'r'}${currency.symbol}');
+  }
 }
 
 
@@ -218,8 +222,8 @@ class MoneyListState extends State<MoneyList>{
             appId: 'ca-app-pub-8832562785647597~3542311842');
 
         banner = BannerAd(
-          adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-//                    adUnitId: BannerAd.testAdUnitId,
+//          adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+          adUnitId: BannerAd.testAdUnitId,
           size: AdSize.smartBanner,
           listener: (event) {
             if (event == MobileAdEvent.loaded) {
@@ -246,7 +250,10 @@ class MoneyListState extends State<MoneyList>{
       localCurrency = true;
       locale = Platform.localeName;
     } else {
-      currency = cur.getFromSymbol(symbol);
+      currency = cur.getFromSymbol(symbol) ?? CurrenciesFormatterSettings(
+          symbol: symbol.substring(1),
+          symbolSide: symbol.startsWith('l') ? SymbolSide.left : SymbolSide.right
+      );
       localCurrency = false;
     }
     setState(() {
@@ -355,7 +362,8 @@ class MoneyListState extends State<MoneyList>{
                   case 2:
                     CurrenciesFormatterSettings option = localCurrency ? null : currency;
                     bool customCurrency = false;
-                    String sideVal;
+                    String symbol = currency.symbol;
+                    String side = currency.symbolSide == SymbolSide.left ? 'left' : 'right';
                     showDialog(
                         context: context,
                         builder: (context) {
@@ -363,80 +371,89 @@ class MoneyListState extends State<MoneyList>{
                             title: Text('Choose Currency'),
                             content: StatefulBuilder(
                                 builder: (context, setState) {
+                                  print(MediaQuery.of(context).size.height - banner.size.height - 256);
                                   if (!customCurrency) {
-                                    return ListView.builder(
-                                        itemCount: Currencies.majors.length + 2,
-                                        itemBuilder: (context, i) {
-                                          if (i == 0) {
-                                            return InkWell(
-                                                child: ListTile(
-                                                  leading: Icon(Icons.add),
-                                                  title: Text('Custom'),
-                                                  onTap: () =>
-                                                  setState(()=>customCurrency = true),
-                                                )
-                                            );
-                                          } else {
-                                            return RadioListTile(
-                                              title: i == 1
-                                                  ? Text('System')
-                                                  : Text(
-                                                  Currencies.majorSymbols
-                                                      .values.elementAt(
-                                                      i - 2)),
-                                              value: i == 1
-                                                  ? null
-                                                  : Currencies.majors.values
-                                                  .elementAt(i - 2),
-                                              groupValue: option,
-                                              activeColor: Theme
-                                                  .of(context)
-                                                  .accentColor,
-                                              onChanged: (val) {
-                                                setState(() {
-                                                  option = val;
-                                                });
-                                              },
-                                            );
-                                          }
-                                        }
+                                    return Container(
+                                        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - banner.size.height - 320),
+                                        child: ListView.builder(
+                                            itemCount: Currencies.majors.length + 2,
+                                            itemBuilder: (context, i) {
+                                              if (i == 0) {
+                                                return InkWell(
+                                                    child: ListTile(
+                                                      leading: Icon(Icons.add),
+                                                      title: Text('Custom'),
+                                                      onTap: () =>
+                                                          setState(()=>customCurrency = true),
+                                                    )
+                                                );
+                                              } else {
+                                                return RadioListTile(
+                                                  title: i == 1
+                                                      ? Text('System')
+                                                      : Text(
+                                                      Currencies.majorSymbols
+                                                          .values.elementAt(
+                                                          i - 2)),
+                                                  value: i == 1
+                                                      ? null
+                                                      : Currencies.majors.values
+                                                      .elementAt(i - 2),
+                                                  groupValue: option,
+                                                  activeColor: Theme
+                                                      .of(context)
+                                                      .accentColor,
+                                                  onChanged: (val) {
+                                                    setState(() {
+                                                      option = val;
+                                                    });
+                                                  },
+                                                );
+                                              }
+                                            }
+                                        )
                                     );
                                   } else {
                                     return Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text('\$9,999.99'),
+                                        Padding(
+                                            padding: EdgeInsets.only(top: 8, bottom: 16),
+                                            child: Text(side == 'left' ? '$symbol 9,999.99' : '9.999,99 $symbol')
+                                        ),
                                         Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           children: [
                                             Flexible(
                                                 flex: 1,
-                                                child: TextField(
+                                                child: TextFormField(
                                                   maxLength: 2,
+                                                  initialValue: symbol,
                                                   decoration: InputDecoration(
-                                                      hintText: 'Symbol'
+                                                      hintText: 'Symbol',
+                                                      counterText: '',
+                                                    border: InputBorder.none
                                                   ),
+                                                  onChanged: (value) => setState(()=>symbol = value),
                                                 )
                                             ),
                                             Flexible(
                                               flex: 1,
                                                 child: DropdownButton(
-                                                  value: sideVal,
+                                                  value: side,
                                                   hint: Text('Side'),
                                                   items: [
                                                     DropdownMenuItem(
                                                       child: Text('Left'),
-                                                      value: 'Left',
+                                                      value: 'left',
                                                     ),
                                                     DropdownMenuItem(
                                                       child: Text('Right'),
-                                                      value: 'Right',
+                                                      value: 'right',
                                                     )
                                                   ],
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      sideVal = value;
-                                                      print(sideVal);
-                                                    });
-                                                  },
+                                                  onChanged: (value) => setState(() => side = value),
+                                                  underline: Container(),
                                                 )
                                             )
                                           ],
@@ -454,12 +471,20 @@ class MoneyListState extends State<MoneyList>{
                               FlatButton(
                                 child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
                                 onPressed: () {
-                                  if (option == null) {
-                                    currency = cur.getLocal();
-                                    localCurrency = true;
-                                    locale = Platform.localeName;
+                                  if (!customCurrency) {
+                                    if (option == null) {
+                                      currency = cur.getLocal();
+                                      localCurrency = true;
+                                      locale = Platform.localeName;
+                                    } else {
+                                      currency = option;
+                                      localCurrency = false;
+                                    }
                                   } else {
-                                    currency = option;
+                                    currency = CurrenciesFormatterSettings(
+                                        symbol: symbol,
+                                        symbolSide: side == 'left' ? SymbolSide.left : SymbolSide.right
+                                    );
                                     localCurrency = false;
                                   }
                                   updateData();
@@ -511,8 +536,8 @@ class MoneyListState extends State<MoneyList>{
                     } else {
                       showAds = true;
                       banner = BannerAd(
-                        adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-//                    adUnitId: BannerAd.testAdUnitId,
+//                        adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+                        adUnitId: BannerAd.testAdUnitId,
                         size: AdSize.smartBanner,
                         listener: (event) {
                           if (event == MobileAdEvent.loaded) {
@@ -916,7 +941,7 @@ class AddDialogState extends State<AddDialog>{
                           }
                         } else {
                           var snackbar = SnackBar(
-                              content: Text('Name and ${currency.moneyFormatterSettings.symbol} are required'));
+                              content: Text('Name and ${currency.symbol} are required'));
                           Scaffold.of(context).showSnackBar(snackbar);
                         }
                       }
@@ -995,7 +1020,7 @@ class AddDialogState extends State<AddDialog>{
                                       keyboardType: TextInputType.numberWithOptions(signed: true, decimal:true),
                                       cursorColor: validAmount ? Theme.of(context).accentColor : Theme.of(context).errorColor,
                                       decoration: InputDecoration(
-                                          labelText: currency.moneyFormatterSettings.symbol,
+                                          labelText: currency.symbol,
                                           border: OutlineInputBorder(),
                                           errorText: validAmount ? null : '',
                                       ),
@@ -1093,7 +1118,7 @@ class _addItemDialogState extends State{
                               .of(context)
                               .errorColor,
                           decoration: InputDecoration(
-                            hintText: currency.moneyFormatterSettings.symbol,
+                            hintText: currency.symbol,
                             errorText: validAmount ? null : '',
                           ),
                         ),
@@ -1653,9 +1678,9 @@ notificationDialog(context, d) async {
         0,
         int.parse(d[0]) > 0 ? 'Get you money back!' : 'You have to give some money back!',
         int.parse(d[0]) > 0 ?
-          '${d[1]} owes you ${d[0]}${currency.moneyFormatterSettings.symbol}'
+          '${d[1]} owes you ${d[0]}${currency.symbol}'
               :
-          'You owe ${d[1]} ${d[0].slice(1)}${currency.moneyFormatterSettings.symbol}',
+          'You owe ${d[1]} ${d[0].slice(1)}${currency.symbol}',
         dt,
         notiDetails
     );
