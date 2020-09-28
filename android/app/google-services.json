@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "1031703407024",
+    "firebase_url": "https://debt-tracker-910.firebaseio.com",
+    "project_id": "debt-tracker-910",
+    "storage_bucket": "debt-tracker-910.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1031703407024:android:b3da7d10639e692a170e75",
+        "android_client_info": {
+          "package_name": "tk.roman910.debt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1031703407024-epten6tofa3hn49jdj9smdgmjfga4ifq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVhRczMcc9LsaaL9XMh1Oj62PgBDBZA9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1031703407024-epten6tofa3hn49jdj9smdgmjfga4ifq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-8832562785647597~3542311842"
+    }
+  ],
+  "configuration_version": "1"
+}

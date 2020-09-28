@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.roman910.debt">
+    package="tk.roman910.debt">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -17,16 +17,11 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="debt"
+        android:label="Debt Tracker"
         android:icon="@mipmap/ic_launcher">
 
-        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID"
+        android:value="ca-app-pub-8832562785647597~3542311842"/>
 
         <activity
             android:name=".MainActivity"

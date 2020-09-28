@@ -1,4 +1,4 @@
-package com.roman910.debt
+package tk.roman910.debt
 
 import android.os.Bundle
 
