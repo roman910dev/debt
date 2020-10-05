@@ -8,7 +8,7 @@ import 'package:flutter_share/flutter_share.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:currencies/currencies.dart';
+import 'package:currency_formatter/currency_formatter.dart';
 
 
 void main() => runApp(MyApp());
@@ -23,11 +23,11 @@ var todo;
 var flnp;
 var notiDetails;
 var id = 0;
-CurrenciesFormatterSettings currency;
+CurrencyFormatterSettings currency;
 bool localCurrency;
 String locale;
 bool showAds = true;
-Currencies cur = Currencies();
+CurrencyFormatter cf = CurrencyFormatter();
 
 ValueNotifier theme = ValueNotifier('system');
 List<String> themes = ['light', 'dark', 'system'];
@@ -105,7 +105,7 @@ updateData() async {
   prefs.setStringList('dexpr', dexpr);
   prefs.setString('theme', theme.value);
   prefs.setBool('showAds', showAds);
-  if (Currencies.majors.values.contains(currency)) {
+  if (CurrencyFormatter.majors.values.contains(currency)) {
     prefs.setString('currencySymbol', localCurrency ? null : currency.symbol);
   } else {
     prefs.setString('currencySymbol', '${currency.symbolSide == SymbolSide.left ? 'l' : 'r'}${currency.symbol}');
@@ -222,8 +222,8 @@ class MoneyListState extends State<MoneyList>{
             appId: 'ca-app-pub-8832562785647597~3542311842');
 
         banner = BannerAd(
-//          adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-          adUnitId: BannerAd.testAdUnitId,
+         adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+          // adUnitId: BannerAd.testAdUnitId,
           size: AdSize.smartBanner,
           listener: (event) {
             if (event == MobileAdEvent.loaded) {
@@ -246,11 +246,11 @@ class MoneyListState extends State<MoneyList>{
     var prefs = await SharedPreferences.getInstance();
     String symbol = prefs.getString('currencySymbol');
     if (symbol == null) {
-      currency = cur.getLocal();
+      currency = cf.getLocal();
       localCurrency = true;
       locale = Platform.localeName;
     } else {
-      currency = cur.getFromSymbol(symbol) ?? CurrenciesFormatterSettings(
+      currency = cf.getFromSymbol(symbol) ?? CurrencyFormatterSettings(
           symbol: symbol.substring(1),
           symbolSide: symbol.startsWith('l') ? SymbolSide.left : SymbolSide.right
       );
@@ -278,7 +278,7 @@ class MoneyListState extends State<MoneyList>{
       @override
       Widget build(BuildContext context) {
         if (localCurrency && Platform.localeName != locale) {
-          currency = cur.getLocal();
+          currency = cf.getLocal();
           locale = Platform.localeName;
         }
         if (selected.length == 0) {
@@ -360,7 +360,7 @@ class MoneyListState extends State<MoneyList>{
                     );
                     break;
                   case 2:
-                    CurrenciesFormatterSettings option = localCurrency ? null : currency;
+                    CurrencyFormatterSettings option = localCurrency ? null : currency;
                     bool customCurrency = false;
                     String symbol = currency.symbol;
                     String side = currency.symbolSide == SymbolSide.left ? 'left' : 'right';
@@ -376,7 +376,7 @@ class MoneyListState extends State<MoneyList>{
                                     return Container(
                                         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - banner.size.height - 320),
                                         child: ListView.builder(
-                                            itemCount: Currencies.majors.length + 2,
+                                            itemCount: CurrencyFormatter.majors.length + 2,
                                             itemBuilder: (context, i) {
                                               if (i == 0) {
                                                 return InkWell(
@@ -392,12 +392,12 @@ class MoneyListState extends State<MoneyList>{
                                                   title: i == 1
                                                       ? Text('System')
                                                       : Text(
-                                                      Currencies.majorSymbols
+                                                      CurrencyFormatter.majorSymbols
                                                           .values.elementAt(
                                                           i - 2)),
                                                   value: i == 1
                                                       ? null
-                                                      : Currencies.majors.values
+                                                      : CurrencyFormatter.majors.values
                                                       .elementAt(i - 2),
                                                   groupValue: option,
                                                   activeColor: Theme
@@ -473,7 +473,7 @@ class MoneyListState extends State<MoneyList>{
                                 onPressed: () {
                                   if (!customCurrency) {
                                     if (option == null) {
-                                      currency = cur.getLocal();
+                                      currency = cf.getLocal();
                                       localCurrency = true;
                                       locale = Platform.localeName;
                                     } else {
@@ -481,7 +481,7 @@ class MoneyListState extends State<MoneyList>{
                                       localCurrency = false;
                                     }
                                   } else {
-                                    currency = CurrenciesFormatterSettings(
+                                    currency = CurrencyFormatterSettings(
                                         symbol: symbol,
                                         symbolSide: side == 'left' ? SymbolSide.left : SymbolSide.right
                                     );
@@ -536,8 +536,8 @@ class MoneyListState extends State<MoneyList>{
                     } else {
                       showAds = true;
                       banner = BannerAd(
-//                        adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-                        adUnitId: BannerAd.testAdUnitId,
+                       adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+                        // adUnitId: BannerAd.testAdUnitId,
                         size: AdSize.smartBanner,
                         listener: (event) {
                           if (event == MobileAdEvent.loaded) {
@@ -861,7 +861,7 @@ class MoneyListState extends State<MoneyList>{
                                 flex: 2,
                                 child: Padding(
                                     padding: EdgeInsets.only(left: 16.0),
-                                    child: Text(i < nums.length ? cur.format(nums[x], currency, compact: true) : '',
+                                    child: Text(i < nums.length ? cf.format(nums[x], currency, compact: true) : '',
                                       textAlign: TextAlign.end,
                                       style: TextStyle(
                                           color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor,
@@ -1403,7 +1403,7 @@ class FullScreenState extends State<FullScreen>{
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'ProductSans'
                             ),),
-                            Text(cur.format(total, currency), style: TextStyle(
+                            Text(cf.format(total, currency), style: TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
                                 color: '$total'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor
@@ -1498,7 +1498,7 @@ class FullScreenState extends State<FullScreen>{
                                               child: Padding(
                                                   padding: EdgeInsets.only(
                                                       left: 16.0),
-                                                  child: Text(cur.format(here[i][0], currency),
+                                                  child: Text(cf.format(here[i][0], currency),
                                                     textAlign: TextAlign.end,
                                                     style: TextStyle(
                                                         color: here[i][0][0] == '-'
@@ -1606,7 +1606,7 @@ class FullScreenState extends State<FullScreen>{
                                             child: Padding(
                                                 padding: EdgeInsets.only(
                                                     left: 16.0),
-                                                child: Text(cur.format(dhere[i][0], currency),
+                                                child: Text(cf.format(dhere[i][0], currency),
                                                   textAlign: TextAlign.end,
                                                   style: TextStyle(
                                                       color: Theme.of(context).textTheme.caption.color,
