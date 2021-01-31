@@ -13,6 +13,8 @@ import 'package:currency_formatter/currency_formatter.dart';
 
 void main() => runApp(MyApp());
 
+bool iOSWeb = false;
+
 var header = TextStyle(fontSize: 20.0, color: Color(0xde000000), fontWeight: FontWeight.bold);
 Map<String, num> nums = Map<String, num>();
 var dates = Map();
@@ -24,7 +26,7 @@ var flnp;
 var notiDetails;
 var id = 0;
 CurrencyFormatterSettings currency;
-bool localCurrency;
+bool localCurrency = false;
 String locale;
 bool showAds = true;
 CurrencyFormatter cf = CurrencyFormatter();
@@ -105,7 +107,7 @@ updateData() async {
   prefs.setStringList('dexpr', dexpr);
   prefs.setString('theme', theme.value);
   prefs.setBool('showAds', showAds);
-  if (CurrencyFormatter.majors.values.contains(currency)) {
+  if (cf.majors.values.contains(currency)) {
     prefs.setString('currencySymbol', localCurrency ? null : currency.symbol);
   } else {
     prefs.setString('currencySymbol', '${currency.symbolSide == SymbolSide.left ? 'l' : 'r'}${currency.symbol}');
@@ -277,6 +279,7 @@ class MoneyListState extends State<MoneyList>{
 
       @override
       Widget build(BuildContext context) {
+        iOSWeb = kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
         if (localCurrency && Platform.localeName != locale) {
           currency = cf.getLocal();
           locale = Platform.localeName;
@@ -376,7 +379,7 @@ class MoneyListState extends State<MoneyList>{
                                     return Container(
                                         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - banner.size.height - 320),
                                         child: ListView.builder(
-                                            itemCount: CurrencyFormatter.majors.length + 2,
+                                            itemCount: cf.majors.length + 2,
                                             itemBuilder: (context, i) {
                                               if (i == 0) {
                                                 return InkWell(
@@ -392,12 +395,12 @@ class MoneyListState extends State<MoneyList>{
                                                   title: i == 1
                                                       ? Text('System')
                                                       : Text(
-                                                      CurrencyFormatter.majorSymbols
+                                                      cf.majorSymbols
                                                           .values.elementAt(
                                                           i - 2)),
                                                   value: i == 1
                                                       ? null
-                                                      : CurrencyFormatter.majors.values
+                                                      : cf.majors.values
                                                       .elementAt(i - 2),
                                                   groupValue: option,
                                                   activeColor: Theme
@@ -1017,7 +1020,7 @@ class AddDialogState extends State<AddDialog>{
                                           });
                                         }
                                       },
-                                      keyboardType: TextInputType.numberWithOptions(signed: true, decimal:true),
+                                      keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal:true),
                                       cursorColor: validAmount ? Theme.of(context).accentColor : Theme.of(context).errorColor,
                                       decoration: InputDecoration(
                                           labelText: currency.symbol,
@@ -1111,7 +1114,7 @@ class _addItemDialogState extends State{
                             }
                           },
                           textAlign: TextAlign.center,
-                          keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
+                          keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
                           cursorColor: validAmount ? Theme
                               .of(context)
                               .accentColor : Theme
