@@ -9,11 +9,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:currency_formatter/currency_formatter.dart';
+import 'package:expressions/expressions.dart';
 
 
 void main() => runApp(MyApp());
 
 bool iOSWeb = false;
+
+ExpressionEvaluator eval = ExpressionEvaluator();
 
 var header = TextStyle(fontSize: 20.0, color: Color(0xde000000), fontWeight: FontWeight.bold);
 Map<String, num> nums = Map<String, num>();
@@ -54,35 +57,34 @@ List<AboutTile> aboutInfo = [
 ];
 
 ThemeData lightTheme = ThemeData(
-  errorColor: Colors.red,
-  primarySwatch: Colors.green,
-  accentColor: Colors.green,
-  cursorColor: Colors.green,
-  textSelectionHandleColor: Colors.green,
-  textSelectionColor: Colors.green,
-  buttonColor: Colors.green,
-  cardColor: Colors.white,
-  primaryTextTheme: TextTheme(
-      headline6: TextStyle(color: Colors.green, fontFamily: 'Roboto', fontWeight: FontWeight.w500)
-  ),
-  textTheme: TextTheme(
-      bodyText2: TextStyle(fontFamily: 'Roboto'),
-      bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
-  ),
-  primaryIconTheme: IconThemeData(color: Colors.green),
+    errorColor: Colors.red,
+    primarySwatch: Colors.green,
+    accentColor: Colors.green,
+    buttonColor: Colors.green,
+    cardColor: Colors.white,
+    primaryTextTheme: TextTheme(
+        headline6: TextStyle(color: Colors.green, fontFamily: 'Roboto', fontWeight: FontWeight.w500)
+    ),
+    textTheme: TextTheme(
+        bodyText2: TextStyle(fontFamily: 'Roboto'),
+        bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+        button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+        headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
+    ),
+    primaryIconTheme: IconThemeData(color: Colors.green),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.green,
+      selectionHandleColor: Colors.green,
+      selectionColor: Colors.green,
+    )
 );
 
 ThemeData darkTheme = ThemeData(
   errorColor: Colors.red[200],
-  primarySwatch: Colors.green,
+  primarySwatch: MaterialColor(Colors.green[200].value, {}),
   accentColor: Colors.green[200],
-  cursorColor: Colors.green[200],
   primaryColor: Color(0xff404040),
   cardColor:  Color(0xff404040),
-  textSelectionHandleColor: Colors.green[200],
-  textSelectionColor: Colors.green[200],
   buttonColor: Colors.green[200],
   primaryTextTheme: TextTheme(
       headline6: TextStyle(color: Colors.green[200], fontFamily: 'Roboto', fontWeight: FontWeight.w500)
@@ -94,12 +96,13 @@ ThemeData darkTheme = ThemeData(
       headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
   ),
   primaryIconTheme: IconThemeData(color: Colors.green[200]),
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: Colors.green[200],
+    selectionHandleColor: Colors.green[200],
+    selectionColor: Colors.green[200],
+  ),
   brightness: Brightness.dark,
 );
-
-_notYetSnack(scaffold) {
-  scaffold.showSnackBar(SnackBar(content: Text('Not available yet!')));
-}
 
 updateData() async {
   var prefs = await SharedPreferences.getInstance();
@@ -160,7 +163,7 @@ Widget aboutSheet(context) {
                       itemCount: 4,
                       itemBuilder: (context, i) {
                         return ListTile(
-                          leading: Icon(aboutInfo[i].leading, color: Theme.of(context).textTheme.body1.color,),
+                          leading: Icon(aboutInfo[i].leading, color: Theme.of(context).textTheme.bodyText2.color,),
                           title: Text(aboutInfo[i].title, style: TextStyle(
                               fontSize: 16
                           ),),
@@ -198,7 +201,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: theme,
+        valueListenable: theme,
         builder: (context, theme, _) => MaterialApp(
           title: 'Debt Tracker',
           home: MoneyList(),
@@ -224,7 +227,7 @@ class MoneyListState extends State<MoneyList>{
             appId: 'ca-app-pub-8832562785647597~3542311842');
 
         banner = BannerAd(
-         adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+          adUnitId: 'ca-app-pub-8832562785647597/8322552151',
           // adUnitId: BannerAd.testAdUnitId,
           size: AdSize.smartBanner,
           listener: (event) {
@@ -248,9 +251,14 @@ class MoneyListState extends State<MoneyList>{
     var prefs = await SharedPreferences.getInstance();
     String symbol = prefs.getString('currencySymbol');
     if (symbol == null) {
-      currency = cf.getLocal();
-      localCurrency = true;
-      locale = Platform.localeName;
+      if (kIsWeb) {
+        currency = CurrencyFormatter.usd;
+        localCurrency = false;
+      } else {
+        currency = cf.getLocal();
+        localCurrency = true;
+        locale = Platform.localeName;
+      }
     } else {
       currency = cf.getFromSymbol(symbol) ?? CurrencyFormatterSettings(
           symbol: symbol.substring(1),
@@ -268,628 +276,647 @@ class MoneyListState extends State<MoneyList>{
 
 
 
-      var appBarActions;
-      var appBarTitle = Text('Debt Tracker');
-      var appBarLeading;
+  var appBarActions;
+  var appBarTitle = Text('Debt Tracker');
+  var appBarLeading;
 
-      var selected = [];
-      var selectMode = false;
+  var selected = [];
+  var selectMode = false;
 
-      var _scaffoldKey = GlobalKey<ScaffoldState>();
+  var _scaffoldKey = GlobalKey<ScaffoldState>();
 
-      @override
-      Widget build(BuildContext context) {
-        iOSWeb = kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
-        if (localCurrency && Platform.localeName != locale) {
-          currency = cf.getLocal();
-          locale = Platform.localeName;
-        }
-        if (selected.length == 0) {
-          appBarActions = [IconButton(icon: Icon(Icons.add, color: Theme.of(context).accentColor), onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute<String>(
-                builder: (context) {
-                  return AddDialog();
-                },
-                fullscreenDialog: true
-            )).then((_){setState(() {});});
-          }),
-            PopupMenuButton(
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                    value: 1,
-                    child: Text('Set Theme')
-                ),
-                PopupMenuItem(
-                    value: 2,
-                    child: Text('Set Currency')
-                ),
-                PopupMenuItem(
-                  value: 3,
-                  child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
-                ),
-                PopupMenuItem(
-                  value: 4,
-                  child: Text('About'),
-                )
-              ],
-              onSelected: (value) {
-                switch (value) {
-                  case 1:
-                    String option = theme.value;
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Choose Theme'),
-                            content: StatefulBuilder(
-                                builder: (context, setState) {
-                                  return Container(
-                                      constraints: BoxConstraints(maxHeight: 150),
-                                      child: ListView.builder(
-                                          itemCount: themes.length,
-                                          physics: NeverScrollableScrollPhysics(),
-                                          itemBuilder: (context, i) {
+  @override
+  Widget build(BuildContext context) {
+    iOSWeb = kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
+    if (localCurrency && Platform.localeName != locale) {
+      currency = cf.getLocal();
+      locale = Platform.localeName;
+    }
+    if (selected.length == 0) {
+      appBarActions = [IconButton(icon: Icon(Icons.add, color: Theme.of(context).accentColor), onPressed: () {
+        Navigator.of(context).push(MaterialPageRoute<String>(
+            builder: (context) {
+              return AddDialog();
+            },
+            fullscreenDialog: true
+        )).then((_){setState(() {});});
+      }),
+        PopupMenuButton(
+          itemBuilder: (context) => kIsWeb
+          ?
+            [
+              PopupMenuItem(
+                  value: 1,
+                  child: Text('Set Theme')
+              ),
+              PopupMenuItem(
+                  value: 2,
+                  child: Text('Set Currency')
+              ),
+            ]
+          :
+            [
+              PopupMenuItem(
+                  value: 1,
+                  child: Text('Set Theme')
+              ),
+              PopupMenuItem(
+                  value: 2,
+                  child: Text('Set Currency')
+              ),
+              PopupMenuItem(
+                value: 3,
+                child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
+              ),
+              PopupMenuItem(
+                value: 4,
+                child: Text('About'),
+              )
+            ],
+          onSelected: (value) {
+            switch (value) {
+              case 1:
+                String option = theme.value;
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Choose Theme'),
+                        content: StatefulBuilder(
+                            builder: (context, setState) {
+                              return Container(
+                                  width: double.maxFinite,
+                                  constraints: BoxConstraints(maxHeight: 150),
+                                  child: ListView.builder(
+                                      itemCount: themes.length,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemBuilder: (context, i) {
+                                        return RadioListTile(
+                                          title: Text('${themes[i].substring(0,1).toUpperCase()}${themes[i].substring(1)}'),
+                                          value: themes[i],
+                                          groupValue: option,
+                                          activeColor: Theme.of(context).accentColor,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              option = val;
+                                            });},
+                                        );
+                                      }
+                                  )
+                              );
+                            }
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          TextButton(
+                            child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
+                            onPressed: () {
+                              theme.value = option;
+                              updateData();
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
+                );
+                break;
+              case 2:
+                CurrencyFormatterSettings option = localCurrency ? null : currency;
+                bool customCurrency = false;
+                String symbol = currency.symbol;
+                String side = currency.symbolSide == SymbolSide.left ? 'left' : 'right';
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Choose Currency'),
+                        content: StatefulBuilder(
+                            builder: (context, setState) {
+                              num bannerHeight = banner == null ? 0 : banner.size.height;
+                              print(MediaQuery.of(context).size.height - bannerHeight - 256);
+                              if (!customCurrency) {
+                                return Container(
+                                    width: double.maxFinite,
+                                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - bannerHeight - 320),
+                                    child: ListView.builder(
+                                        itemCount: cf.majors.length + 2,
+                                        itemBuilder: (context, i) {
+                                          if (i == 0) {
+                                            return InkWell(
+                                                child: ListTile(
+                                                  leading: Icon(Icons.add),
+                                                  title: Text('Custom'),
+                                                  onTap: () =>
+                                                      setState(()=>customCurrency = true),
+                                                )
+                                            );
+                                          } else {
+                                            if (kIsWeb && i == 1) {
+                                              return Container();
+                                            }
                                             return RadioListTile(
-                                              title: Text('${themes[i].substring(0,1).toUpperCase()}${themes[i].substring(1)}'),
-                                              value: themes[i],
+                                              title: i == 1
+                                                  ? Text('System')
+                                                  : Text(
+                                                  cf.majorSymbols
+                                                      .values.elementAt(
+                                                      i - 2)),
+                                              value: i == 1
+                                                  ? null
+                                                  : cf.majors.values
+                                                  .elementAt(i - 2),
                                               groupValue: option,
-                                              activeColor: Theme.of(context).accentColor,
+                                              activeColor: Theme
+                                                  .of(context)
+                                                  .accentColor,
                                               onChanged: (val) {
                                                 setState(() {
                                                   option = val;
-                                                });},
+                                                });
+                                              },
                                             );
                                           }
-                                      )
-                                  );
-                                }
-                            ),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                              FlatButton(
-                                child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
-                                onPressed: () {
-                                  theme.value = option;
-                                  updateData();
-                                  Navigator.of(context).pop();
-                                },
-                              )
-                            ],
-                          );
-                        }
-                    );
-                    break;
-                  case 2:
-                    CurrencyFormatterSettings option = localCurrency ? null : currency;
-                    bool customCurrency = false;
-                    String symbol = currency.symbol;
-                    String side = currency.symbolSide == SymbolSide.left ? 'left' : 'right';
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('Choose Currency'),
-                            content: StatefulBuilder(
-                                builder: (context, setState) {
-                                  print(MediaQuery.of(context).size.height - banner.size.height - 256);
-                                  if (!customCurrency) {
-                                    return Container(
-                                        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - banner.size.height - 320),
-                                        child: ListView.builder(
-                                            itemCount: cf.majors.length + 2,
-                                            itemBuilder: (context, i) {
-                                              if (i == 0) {
-                                                return InkWell(
-                                                    child: ListTile(
-                                                      leading: Icon(Icons.add),
-                                                      title: Text('Custom'),
-                                                      onTap: () =>
-                                                          setState(()=>customCurrency = true),
-                                                    )
-                                                );
-                                              } else {
-                                                return RadioListTile(
-                                                  title: i == 1
-                                                      ? Text('System')
-                                                      : Text(
-                                                      cf.majorSymbols
-                                                          .values.elementAt(
-                                                          i - 2)),
-                                                  value: i == 1
-                                                      ? null
-                                                      : cf.majors.values
-                                                      .elementAt(i - 2),
-                                                  groupValue: option,
-                                                  activeColor: Theme
-                                                      .of(context)
-                                                      .accentColor,
-                                                  onChanged: (val) {
-                                                    setState(() {
-                                                      option = val;
-                                                    });
-                                                  },
-                                                );
-                                              }
-                                            }
-                                        )
-                                    );
-                                  } else {
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
+                                        }
+                                    )
+                                );
+                              } else {
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(
+                                        padding: EdgeInsets.only(top: 8, bottom: 16),
+                                        child: Text(side == 'left' ? '$symbol 9,999.99' : '9.999,99 $symbol')
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Padding(
-                                            padding: EdgeInsets.only(top: 8, bottom: 16),
-                                            child: Text(side == 'left' ? '$symbol 9,999.99' : '9.999,99 $symbol')
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Flexible(
-                                                flex: 1,
-                                                child: TextFormField(
-                                                  maxLength: 2,
-                                                  initialValue: symbol,
-                                                  decoration: InputDecoration(
-                                                      hintText: 'Symbol',
-                                                      counterText: '',
-                                                    border: InputBorder.none
-                                                  ),
-                                                  onChanged: (value) => setState(()=>symbol = value),
-                                                )
-                                            ),
-                                            Flexible(
-                                              flex: 1,
-                                                child: DropdownButton(
-                                                  value: side,
-                                                  hint: Text('Side'),
-                                                  items: [
-                                                    DropdownMenuItem(
-                                                      child: Text('Left'),
-                                                      value: 'left',
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      child: Text('Right'),
-                                                      value: 'right',
-                                                    )
-                                                  ],
-                                                  onChanged: (value) => setState(() => side = value),
-                                                  underline: Container(),
-                                                )
+                                        Flexible(
+                                            flex: 1,
+                                            child: TextFormField(
+                                              maxLength: 2,
+                                              initialValue: symbol,
+                                              decoration: InputDecoration(
+                                                  hintText: 'Symbol',
+                                                  counterText: '',
+                                                  border: InputBorder.none
+                                              ),
+                                              onChanged: (value) => setState(()=>symbol = value),
                                             )
-                                          ],
+                                        ),
+                                        Flexible(
+                                            flex: 1,
+                                            child: DropdownButton(
+                                              value: side,
+                                              hint: Text('Side'),
+                                              items: [
+                                                DropdownMenuItem(
+                                                  child: Text('Left'),
+                                                  value: 'left',
+                                                ),
+                                                DropdownMenuItem(
+                                                  child: Text('Right'),
+                                                  value: 'right',
+                                                )
+                                              ],
+                                              onChanged: (value) => setState(() => side = value),
+                                              underline: Container(),
+                                            )
                                         )
                                       ],
-                                    );
-                                  }
+                                    )
+                                  ],
+                                );
+                              }
+                            }
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          TextButton(
+                            child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
+                            onPressed: () {
+                              if (!customCurrency) {
+                                if (option == null) {
+                                  currency = cf.getLocal();
+                                  localCurrency = true;
+                                  locale = Platform.localeName;
+                                } else {
+                                  currency = option;
+                                  localCurrency = false;
                                 }
-                            ),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
+                              } else {
+                                currency = CurrencyFormatterSettings(
+                                    symbol: symbol,
+                                    symbolSide: side == 'left' ? SymbolSide.left : SymbolSide.right
+                                );
+                                localCurrency = false;
+                              }
+                              updateData();
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
+                ).then((_) => setState((){}));
+                break;
+              case 3:
+                if (showAds) {
+                  showDialog(
+                      context: context,
+                      builder: (context) =>
+                          AlertDialog(
+                            title: Text('Hide Ads (Free)'),
+                            content: Text(
+                                'You can hide all the ads of any of my apps with no cost at all. However, I would like you to consider keeping them as the very little money I get from showing them is my only profit for working on these apps.'),
+                            actions: [
+                              TextButton(
+                                child: Text(
+                                  'CANCEL', style: TextStyle(color: Theme
+                                    .of(context)
+                                    .accentColor),),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
-                              FlatButton(
-                                child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
+                              TextButton(
+                                child: Text(
+                                    'HIDE', style: TextStyle(color: Theme
+                                    .of(context)
+                                    .accentColor)),
                                 onPressed: () {
-                                  if (!customCurrency) {
-                                    if (option == null) {
-                                      currency = cf.getLocal();
-                                      localCurrency = true;
-                                      locale = Platform.localeName;
-                                    } else {
-                                      currency = option;
-                                      localCurrency = false;
-                                    }
-                                  } else {
-                                    currency = CurrencyFormatterSettings(
-                                        symbol: symbol,
-                                        symbolSide: side == 'left' ? SymbolSide.left : SymbolSide.right
-                                    );
-                                    localCurrency = false;
+                                  try {
+                                    showAds = false;
+                                    banner.dispose();
+                                    banner = null;
+                                  } catch (e) {
+                                    print('BANNER DISPOSE ERROR: $e');
                                   }
                                   updateData();
                                   Navigator.of(context).pop();
                                 },
                               )
                             ],
-                          );
-                        }
-                    ).then((_) => setState((){}));
-                    break;
-                  case 3:
-                    if (showAds) {
-                      showDialog(
-                          context: context,
-                          builder: (context) =>
-                              AlertDialog(
-                                title: Text('Hide Ads (Free)'),
-                                content: Text(
-                                    'You can hide all the ads of any of my apps with no cost at all. However, I would like you to consider keeping them as the very little money I get from showing them is my only profit for working on these apps.'),
-                                actions: [
-                                  FlatButton(
-                                    child: Text(
-                                      'CANCEL', style: TextStyle(color: Theme
-                                        .of(context)
-                                        .accentColor),),
-                                    onPressed: () => Navigator.of(context).pop(),
-                                  ),
-                                  FlatButton(
-                                    child: Text(
-                                        'HIDE', style: TextStyle(color: Theme
-                                        .of(context)
-                                        .accentColor)),
-                                    onPressed: () {
-                                      try {
-                                        showAds = false;
-                                        banner.dispose();
-                                        banner = null;
-                                      } catch (e) {
-                                        print('BANNER DISPOSE ERROR: $e');
-                                      }
-                                      updateData();
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              )
-                      );
-                    } else {
-                      showAds = true;
-                      banner = BannerAd(
-                       adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-                        // adUnitId: BannerAd.testAdUnitId,
-                        size: AdSize.smartBanner,
-                        listener: (event) {
-                          if (event == MobileAdEvent.loaded) {
-                            setState(() {
-                              activeBanner = true;
-                            });
-                          } else if (event == MobileAdEvent.failedToLoad) {
-                            setState(() {
-                              activeBanner = false;
-                            });
-                          }
-                        },
-                      );
-                      banner..load()..show();
-                      updateData();
-                    }
-                    break;
-                  case 4:
-                    showModalBottomSheet(
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      context: context,
-                      builder:(context) {
-                        return aboutSheet(context);
-                      },
-                    );
-                    break;
-                }
-              },
-            )];
-        }
-        return Scaffold(
-          key: _scaffoldKey,
-          appBar: AppBar(
-            title: appBarTitle,
-            brightness: Theme.of(context).brightness,
-            backgroundColor: Theme.of(context).bottomAppBarColor,
-            actions: appBarActions,
-            iconTheme: IconThemeData(color: Theme.of(context).accentColor),
-            leading: appBarLeading,
-          ),
-          body: Builder(
-            builder: (BuildContext context){
-              return _showList();
-            },
-          ),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        );
-      }
-
-      Widget _showList(){
-
-        _date(d) => int.parse(d.split('/').reversed.join());
-
-        nums.clear();
-        dates.clear();
-        ddates.clear();
-
-        expr.forEach((e){
-          var f = e.split('~|~');
-          nums[f[1]] = (nums[f[1]] ?? 0) + double.parse(f[0]);
-          if (nums[f[1]] % 1 == 0) {
-            nums[f[1]] = nums[f[1]].round();
-          }
-          if(_date(f[3]) > (_date(dates[f[1]] ?? '0/0/0'))) dates[f[1]] = f[3];
-        });
-
-        dexpr.forEach((e){
-          var f = e.split('~|~');
-          if(nums[f[1]] == null) if(_date(f[3]) > (_date(ddates[f[1]] ?? '0/0/0'))) ddates[f[1]] = f[3];
-        });
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(8.0),
-          itemCount: nums.length + ddates.length,
-          itemBuilder: (context, i) {
-            return _buildRow(i, context);
-          },
-        );
-      }
-
-      _exitSelectMode() {
-        setState(() {
-          selectMode = false;
-          selected = [];
-          appBarActions = [IconButton(icon: Icon(Icons.add, color: Colors.green), onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute<String>(
-                builder: (context){
-                  return AddDialog();
-                },
-                fullscreenDialog: true
-            )).then((_){setState((){});});
-          })];
-          appBarLeading = null;
-          appBarTitle = Text('Debt Tracker');
-        });
-      }
-
-      _confirmDialog(context, action) {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('$action confirmation'),
-                content: Text('Are you sure you want to ${action.toLowerCase()} multiple items?'),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text('CANCEL',
-                      style: TextStyle(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  FlatButton(
-                    child: Text('ACCEPT',
-                      style: TextStyle(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: () {
-                      switch(action) {
-                        case 'Check':
-                          var toMove = [];
-                          expr.forEach((e){
-                            if (selected.contains(e.split('~|~')[1])) {
-                              toMove.add(e);
-                            }
-                          });
-                          toMove.forEach((e) {
-                            dexpr.add(e);
-                            expr.remove(e);
-                          });
-                          break;
-
-                        case 'Uncheck':
-                          var toMove = [];
-                          dexpr.forEach((e){
-                            if (selected.contains(e.split('~|~')[1])) {
-                              toMove.add(e);
-                            }
-                          });
-                          toMove.forEach((e) {
-                            expr.add(e);
-                            dexpr.remove(e);
-                          });
-                          break;
-
-                        case 'Delete':
-                          var toDelete = [];
-                          expr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
-                          toDelete.forEach((e) => expr.remove(e));
-                          toDelete = [];
-                          dexpr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
-                          toDelete.forEach((e) => dexpr.remove(e));
-                          break;
-
-                        default:
-                          break;
-                      }
-                      updateData();
-                      _exitSelectMode();
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              );
-            }
-        );
-      }
-
-      _editDialog(context){
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            var controller = TextEditingController();
-            controller.text = selected[0];
-            return AlertDialog(
-              title: Text('Edit Item'),
-              content: TextField(
-                controller: controller,
-                textCapitalization: TextCapitalization.words,
-                autofocus: true,
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('CANCEL',
-                    style: TextStyle(color: Theme.of(context).accentColor),
-                  ),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                FlatButton(
-                  child: Text('CHANGE',
-                    style: TextStyle(color: Theme.of(context).accentColor),
-                  ),
-                  onPressed: () {
-                    if (controller.text != '') {
-                      expr.forEach((e) {
-                        List<String> splt = e.split('~|~');
-                        if (splt[1] == selected[0]) {
-                          splt[1] = controller.text;
-                          expr[expr.indexOf(e)] = splt.join('~|~');
-                        }
-                      });
-                      dexpr.forEach((e) {
-                        List<String> splt = e.split('~|~');
-                        if (splt[1] == selected[0]) {
-                          splt[1] = controller.text;
-                          dexpr[dexpr.indexOf(e)] = splt.join('~|~');
-                        }
-                      });
-                      updateData();
-                      _exitSelectMode();
-                      Navigator.of(context).pop();
-                    } else {
-                      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('Name cannot be null!')));
-                    }
-                  },
-                )
-              ],
-            );
-          },
-        );
-      }
-
-      Widget _buildRow(i, context){
-        var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).accentColor,), onPressed: () => _editDialog(context));
-        // var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).accentColor), onPressed: () => _notYetSnack(Scaffold.of(context)));
-        var iconNoti = Container();
-        var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).accentColor,), onPressed: () => _confirmDialog(context, 'Check'));
-        var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
-        var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).accentColor), onPressed: () => _confirmDialog(context, 'Delete'));
-
-        var x = 'ERROR';
-        var y = 'ERROR';
-        if(i < nums.length) {
-          x = nums.keys.elementAt(i);
-        } else {
-          y = ddates.keys.elementAt(i - nums.length);
-        }
-        return Center(
-          child: GestureDetector(
-              onTap: (){
-                if (selectMode) {
-                  if (selected.contains(i < nums.length ? x : y)) {
-                    selected.remove(i < nums.length ? x : y);
-                  } else {
-                    selected.add(i < nums.length ? x : y);
-                  }
-                  var checked = false;
-                  var unchecked = false;
-                  selected.forEach((e){
-                    if (ddates.containsKey(e)) {
-                      checked = true;
-                    } else if (nums.containsKey(e)) {
-                      unchecked = true;
-                    }
-                  });
-                  setState(() {
-                    if (selected.length == 0) {
-                      _exitSelectMode();
-                    } else if (selected.length == 1) {
-                      appBarTitle = Text(selected[0]);
-                      appBarActions = [iconEdit, iconNoti, checked ? iconUncheck : iconCheck, iconDelete];
-                    } else {
-                      appBarTitle = Text('${selected.length} items');
-                      if (checked && unchecked) {
-                        appBarActions = [iconDelete];
-                      } else {
-                        appBarActions = [checked ? iconUncheck : iconCheck, iconDelete];
-                      }
-                    }
-                  });
+                          )
+                  );
                 } else {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        todo = i < nums.length ? x : y;
-                        return FullScreen();
-                      },
-                      fullscreenDialog: true
-                  )).then((_){setState((){});});
+                  showAds = true;
+                  banner = BannerAd(
+                    adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+                    // adUnitId: BannerAd.testAdUnitId,
+                    size: AdSize.smartBanner,
+                    listener: (event) {
+                      if (event == MobileAdEvent.loaded) {
+                        setState(() {
+                          activeBanner = true;
+                        });
+                      } else if (event == MobileAdEvent.failedToLoad) {
+                        setState(() {
+                          activeBanner = false;
+                        });
+                      }
+                    },
+                  );
+                  banner..load()..show();
+                  updateData();
+                }
+                break;
+              case 4:
+                showModalBottomSheet(
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  context: context,
+                  builder:(context) {
+                    return aboutSheet(context);
+                  },
+                );
+                break;
+            }
+          },
+        )];
+    }
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: appBarTitle,
+        brightness: Theme.of(context).brightness,
+        backgroundColor: Theme.of(context).bottomAppBarColor,
+        actions: appBarActions,
+        iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+        leading: appBarLeading,
+      ),
+      body: Builder(
+        builder: (BuildContext context){
+          return _showList();
+        },
+      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    );
+  }
+
+  Widget _showList(){
+
+    _date(d) => int.parse(d.split('/').reversed.join());
+
+    nums.clear();
+    dates.clear();
+    ddates.clear();
+
+    expr.forEach((e){
+      var f = e.split('~|~');
+      nums[f[1]] = (nums[f[1]] ?? 0) + double.parse(f[0]);
+      if (nums[f[1]] % 1 == 0) {
+        nums[f[1]] = nums[f[1]].round();
+      }
+      if(_date(f[3]) > (_date(dates[f[1]] ?? '0/0/0'))) dates[f[1]] = f[3];
+    });
+
+    dexpr.forEach((e){
+      var f = e.split('~|~');
+      if(nums[f[1]] == null) if(_date(f[3]) > (_date(ddates[f[1]] ?? '0/0/0'))) ddates[f[1]] = f[3];
+    });
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(8.0),
+      itemCount: nums.length + ddates.length,
+      itemBuilder: (context, i) {
+        return _buildRow(i, context);
+      },
+    );
+  }
+
+  _exitSelectMode() {
+    setState(() {
+      selectMode = false;
+      selected = [];
+      appBarActions = [IconButton(icon: Icon(Icons.add, color: Colors.green), onPressed: () {
+        Navigator.of(context).push(MaterialPageRoute<String>(
+            builder: (context){
+              return AddDialog();
+            },
+            fullscreenDialog: true
+        )).then((_){setState((){});});
+      })];
+      appBarLeading = null;
+      appBarTitle = Text('Debt Tracker');
+    });
+  }
+
+  _confirmDialog(context, action) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('$action confirmation'),
+            content: Text('Are you sure you want to ${action.toLowerCase()} multiple items?'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('CANCEL',
+                  style: TextStyle(color: Theme.of(context).accentColor),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              TextButton(
+                child: Text('ACCEPT',
+                  style: TextStyle(color: Theme.of(context).accentColor),
+                ),
+                onPressed: () {
+                  switch(action) {
+                    case 'Check':
+                      var toMove = [];
+                      expr.forEach((e){
+                        if (selected.contains(e.split('~|~')[1])) {
+                          toMove.add(e);
+                        }
+                      });
+                      toMove.forEach((e) {
+                        dexpr.add(e);
+                        expr.remove(e);
+                      });
+                      break;
+
+                    case 'Uncheck':
+                      var toMove = [];
+                      dexpr.forEach((e){
+                        if (selected.contains(e.split('~|~')[1])) {
+                          toMove.add(e);
+                        }
+                      });
+                      toMove.forEach((e) {
+                        expr.add(e);
+                        dexpr.remove(e);
+                      });
+                      break;
+
+                    case 'Delete':
+                      var toDelete = [];
+                      expr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
+                      toDelete.forEach((e) => expr.remove(e));
+                      toDelete = [];
+                      dexpr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
+                      toDelete.forEach((e) => dexpr.remove(e));
+                      break;
+
+                    default:
+                      break;
+                  }
+                  updateData();
+                  _exitSelectMode();
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        }
+    );
+  }
+
+  _editDialog(context){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        var controller = TextEditingController();
+        controller.text = selected[0];
+        return AlertDialog(
+          title: Text('Edit Item'),
+          content: TextField(
+            controller: controller,
+            textCapitalization: TextCapitalization.words,
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('CANCEL',
+                style: TextStyle(color: Theme.of(context).accentColor),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: Text('CHANGE',
+                style: TextStyle(color: Theme.of(context).accentColor),
+              ),
+              onPressed: () {
+                if (controller.text != '') {
+                  expr.forEach((e) {
+                    List<String> splt = e.split('~|~');
+                    if (splt[1] == selected[0]) {
+                      splt[1] = controller.text;
+                      expr[expr.indexOf(e)] = splt.join('~|~');
+                    }
+                  });
+                  dexpr.forEach((e) {
+                    List<String> splt = e.split('~|~');
+                    if (splt[1] == selected[0]) {
+                      splt[1] = controller.text;
+                      dexpr[dexpr.indexOf(e)] = splt.join('~|~');
+                    }
+                  });
+                  updateData();
+                  _exitSelectMode();
+                  Navigator.of(context).pop();
+                } else {
+                  ScaffoldMessenger.of(_scaffoldKey.currentContext).showSnackBar(SnackBar(content: Text('Name cannot be null!')));
                 }
               },
-              onLongPress: (){
-                setState(() {
-                  selectMode = true;
-                  selected = [i < nums.length ? x : y];
-                  appBarTitle = Text(i < nums.length ? x : y);
-                  appBarActions = [iconEdit, iconNoti, nums.keys.contains(i < nums.length ? x : y) ? iconCheck : iconUncheck, iconDelete];
-                  appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).accentColor,), onPressed: _exitSelectMode);
-                });
-              },
-              child: Card(
-                  color: i < nums.length ? Theme.of(context).cardColor : Color(0x10000000),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: selected.contains(i < nums.length ? x : y) ? Color(0xe3000000) : Color(0x33000000),
-                      width: selected.contains(i < nums.length ? x : y) ? 2.0 : 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRow(i, context){
+    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).accentColor,), onPressed: () => _editDialog(context));
+    // var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).accentColor), onPressed: () => _notYetSnack(Scaffold.of(context)));
+    var iconNoti = Container();
+    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).accentColor,), onPressed: () => _confirmDialog(context, 'Check'));
+    var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
+    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).accentColor), onPressed: () => _confirmDialog(context, 'Delete'));
+
+    var x = 'ERROR';
+    var y = 'ERROR';
+    if(i < nums.length) {
+      x = nums.keys.elementAt(i);
+    } else {
+      y = ddates.keys.elementAt(i - nums.length);
+    }
+    return Center(
+      child: GestureDetector(
+          onTap: (){
+            if (selectMode) {
+              if (selected.contains(i < nums.length ? x : y)) {
+                selected.remove(i < nums.length ? x : y);
+              } else {
+                selected.add(i < nums.length ? x : y);
+              }
+              var checked = false;
+              var unchecked = false;
+              selected.forEach((e){
+                if (ddates.containsKey(e)) {
+                  checked = true;
+                } else if (nums.containsKey(e)) {
+                  unchecked = true;
+                }
+              });
+              setState(() {
+                if (selected.length == 0) {
+                  _exitSelectMode();
+                } else if (selected.length == 1) {
+                  appBarTitle = Text(selected[0]);
+                  appBarActions = [iconEdit, iconNoti, checked ? iconUncheck : iconCheck, iconDelete];
+                } else {
+                  appBarTitle = Text('${selected.length} items');
+                  if (checked && unchecked) {
+                    appBarActions = [iconDelete];
+                  } else {
+                    appBarActions = [checked ? iconUncheck : iconCheck, iconDelete];
+                  }
+                }
+              });
+            } else {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    todo = i < nums.length ? x : y;
+                    return FullScreen();
+                  },
+                  fullscreenDialog: true
+              )).then((_){setState((){});});
+            }
+          },
+          onLongPress: (){
+            setState(() {
+              selectMode = true;
+              selected = [i < nums.length ? x : y];
+              appBarTitle = Text(i < nums.length ? x : y);
+              appBarActions = [iconEdit, iconNoti, nums.keys.contains(i < nums.length ? x : y) ? iconCheck : iconUncheck, iconDelete];
+              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).accentColor,), onPressed: _exitSelectMode);
+            });
+          },
+          child: Card(
+              color: i < nums.length ? Theme.of(context).cardColor : Color(0x10000000),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: selected.contains(i < nums.length ? x : y) ? Color(0xe3000000) : Color(0x33000000),
+                  width: selected.contains(i < nums.length ? x : y) ? 2.0 : 1.0,
+                ),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Flexible(
-                                  flex: 3,
-                                  child: Text(i < nums.length ? x : y,
-                                    style: TextStyle(
-                                      fontFamily: 'ProductSans',
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.bold,
+                          Flexible(
+                              flex: 3,
+                              child: Text(i < nums.length ? x : y,
+                                style: TextStyle(
+                                  fontFamily: 'ProductSans',
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
 //                                    color: i < nums.length ? Color(0xDE000000) : Color(0x99000000),
-                                      color: i < nums.length ? Theme.of(context).textTheme.subtitle.color : Theme.of(context).textTheme.caption.color,
-                                    ),)
-                              ),
-                              Flexible(
-                                flex: 2,
-                                child: Padding(
-                                    padding: EdgeInsets.only(left: 16.0),
-                                    child: Text(i < nums.length ? cf.format(nums[x], currency, compact: true) : '',
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                          color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18.0
-                                      ),
-                                    )
-                                ),
-                              )
-                            ],
+                                  color: i < nums.length ? Theme.of(context).textTheme.subtitle2.color : Theme.of(context).textTheme.caption.color,
+                                ),)
                           ),
-                          Padding(
-                              padding: EdgeInsets.only(top: 8.0),
-                              child: Text(i < nums.length ? dates[x] : ddates[y],
-                                style: TextStyle(color: Theme.of(context).textTheme.caption.color),
-                              )
+                          Flexible(
+                            flex: 2,
+                            child: Padding(
+                                padding: EdgeInsets.only(left: 16.0),
+                                child: Text(i < nums.length ? cf.format(nums[x], currency, compact: nums[x] >= 10, decimal: 2) : '',
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(
+                                      color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0
+                                  ),
+                                )
+                            ),
                           )
                         ],
+                      ),
+                      Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Text(i < nums.length ? dates[x] : ddates[y],
+                            style: TextStyle(color: Theme.of(context).textTheme.caption.color),
+                          )
                       )
+                    ],
                   )
               )
-          ),
-        );
-      }
-    }
+          )
+      ),
+    );
+  }
+}
 
 class MoneyList extends StatefulWidget {
   @override
@@ -916,23 +943,23 @@ class AddDialogState extends State<AddDialog>{
           actions: <Widget>[
             Builder(
                 builder: (context) {
-                  return FlatButton(
+                  return TextButton(
                       child: Text('SAVE',
                           style: Theme
                               .of(context)
                               .textTheme
-                              .subtitle
+                              .subtitle2
                               .copyWith(color: Theme.of(context).accentColor)),
                       onPressed: () {
                         if (amountController.text.isNotEmpty &&
                             nameController.text.isNotEmpty) {
                           try {
-                            double.parse(amountController.text);
+                            num amount = eval.eval(Expression.parse(amountController.text.replaceAll(currency.decimalSeparator, '.')), {});
                             var date = DateTime.now();
                             var sdate = '${date.day}/${date.month}/${date
                                 .year}';
                             expr.insert(0,
-                                amountController.text + '~|~' +
+                                double.parse(amount.toStringAsFixed(2)).toString() + '~|~' +
                                     nameController.text + '~|~' +
                                     descriptionController.text + '~|~' +
                                     sdate);
@@ -940,12 +967,12 @@ class AddDialogState extends State<AddDialog>{
                             Navigator.of(context).pop();
                           } catch (e) {
                             print(e);
-                            Scaffold.of(context).showSnackBar(SnackBar(content: Text('Invalid Money Input'),));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid Money Input'),));
                           }
                         } else {
                           var snackbar = SnackBar(
                               content: Text('Name and ${currency.symbol} are required'));
-                          Scaffold.of(context).showSnackBar(snackbar);
+                          ScaffoldMessenger.of(context).showSnackBar(snackbar);
                         }
                       }
                   );
@@ -973,7 +1000,7 @@ class AddDialogState extends State<AddDialog>{
                             Row(
                               children: <Widget>[
                                 Flexible(
-                                  flex: 3,
+                                    flex: 3,
                                     child: Padding(
                                       padding: EdgeInsets.only(bottom: validName ? 22 : 0),
                                       child: TextField(
@@ -995,7 +1022,7 @@ class AddDialogState extends State<AddDialog>{
                                           errorText: validName ? null : '',
                                         ),
                                         inputFormatters: [
-                                          BlacklistingTextInputFormatter.singleLineFormatter,
+                                          FilteringTextInputFormatter.singleLineFormatter,
                                           LengthLimitingTextInputFormatter(25)
                                         ],
                                       ),
@@ -1010,36 +1037,44 @@ class AddDialogState extends State<AddDialog>{
                                       textAlign: TextAlign.center,
                                       onChanged: (val) {
                                         try {
-                                          double.parse(val);
+                                          val = val.replaceAll(currency.decimalSeparator, '.');
+                                          print('\tVAL:\t$val');
+                                          print('\tEVAL:\t${eval.eval(Expression.parse(val), {})}');
+                                          print('\tTYPE:\t${eval.eval(Expression.parse(val), {}).runtimeType}');
+                                          // print('\tPARSE:\t${double.parse(eval.eval(Expression.parse(val), {}))}');
+                                          print('\n');
+                                          num amount = eval.eval(Expression.parse(val), {});
+                                          // double.parse(eval.eval(Expression.parse(val), {}));
                                           setState(() {
-                                            validAmount = true;
+                                            validAmount =  amount != double.infinity;
                                           });
-                                        } on Exception {
+                                        } catch(e) {
+                                          print('\tERROR:\t$e');
                                           setState(() {
                                             validAmount = false;
                                           });
                                         }
                                       },
-                                      keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal:true),
+                                      // keyboardType: iOSWeb ? TextInputType.text : TextInputType.datetime,
                                       cursorColor: validAmount ? Theme.of(context).accentColor : Theme.of(context).errorColor,
                                       decoration: InputDecoration(
-                                          labelText: currency.symbol,
-                                          border: OutlineInputBorder(),
-                                          errorText: validAmount ? null : '',
+                                        labelText: currency.symbol,
+                                        border: OutlineInputBorder(),
+                                        errorText: validAmount ? null : '',
                                       ),
                                     ),
                                   ),
                                 )
                               ],
                             ),TextField(
-                                controller: descriptionController,
-                                maxLines: 3,
-                                maxLength: 100,
-                                decoration: InputDecoration(
-                                    labelText: 'Description',
-                                    border: OutlineInputBorder()
-                                ),
+                              controller: descriptionController,
+                              maxLines: 3,
+                              maxLength: 100,
+                              decoration: InputDecoration(
+                                  labelText: 'Description',
+                                  border: OutlineInputBorder()
                               ),
+                            ),
                           ],
                         )
                     )
@@ -1055,22 +1090,22 @@ class AddDialog extends StatefulWidget {
   createState() => AddDialogState();
 }
 
-class _addItemDialog extends StatefulWidget {
-  String name;
+class _AddItemDialog extends StatefulWidget {
+  final String name;
 
-  _addItemDialog(this.name);
+  _AddItemDialog(this.name);
 
   @override
-  State<StatefulWidget> createState() => _addItemDialogState(name);
+  State<StatefulWidget> createState() => _AddItemDialogState(name);
 }
-class _addItemDialogState extends State{
-  String name;
+class _AddItemDialogState extends State{
+  final String name;
 
   var descriptionController = TextEditingController();
   var amountController = TextEditingController();
   bool validAmount = true;
 
-  _addItemDialogState(this.name);
+  _AddItemDialogState(this.name);
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1081,70 +1116,74 @@ class _addItemDialogState extends State{
         ),
       ),
       content: Row(
-                children: [
-                  Flexible(
-                      flex: 3,
-                      child: Padding(
-                          padding: EdgeInsets.only(bottom: 22),
-                          child: TextField(
-                              controller: descriptionController,
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                  hintText: 'Description'
-                              )
-                          )
-                      )
-                  ),
-                  Flexible(
-                      flex: 1,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 16, bottom: validAmount ? 22 : 0),
-                        child: TextField(
-                          controller: amountController,
-                          onChanged: (val) {
-                            try {
-                              double.parse(val);
-                              setState(() {
-                                validAmount = true;
-                              });
-                            } on Exception {
-                              setState(() {
-                                validAmount = false;
-                              });
-                            }
-                          },
-                          textAlign: TextAlign.center,
-                          keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
-                          cursorColor: validAmount ? Theme
-                              .of(context)
-                              .accentColor : Theme
-                              .of(context)
-                              .errorColor,
-                          decoration: InputDecoration(
-                            hintText: currency.symbol,
-                            errorText: validAmount ? null : '',
-                          ),
-                        ),
-                      )
-                  )
-                ]
+          children: [
+            Flexible(
+                flex: 3,
+                child: Padding(
+                    padding: EdgeInsets.only(bottom: 22),
+                    child: TextField(
+                        controller: descriptionController,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                            hintText: 'Description'
+                        )
+                    )
+                )
             ),
+            Flexible(
+                flex: 1,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 16, bottom: validAmount ? 22 : 0),
+                  child: TextField(
+                    controller: amountController,
+                    onChanged: (val) {
+                      try {
+                        val = val.replaceAll(currency.decimalSeparator, '.');
+                        num amount = eval.eval(Expression.parse(val), {});
+                        setState(() {
+                          validAmount = amount != double.infinity;
+                        });
+                      } on Exception {
+                        setState(() {
+                          validAmount = false;
+                        });
+                      }
+                    },
+                    textAlign: TextAlign.center,
+                    // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
+                    cursorColor: validAmount ? Theme
+                        .of(context)
+                        .accentColor : Theme
+                        .of(context)
+                        .errorColor,
+                    decoration: InputDecoration(
+                      hintText: currency.symbol,
+                      errorText: validAmount ? null : '',
+                    ),
+                  ),
+                )
+            )
+          ]
+      ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text('CANCEL',
             style: TextStyle(color: Theme.of(context).accentColor),
           ),
           onPressed: ()=> Navigator.of(context).pop(),
         ),
-        FlatButton(
+        TextButton(
           child: Text('ADD'),
-          textColor: Theme.of(context).accentColor,
-          disabledTextColor: Theme.of(context).accentColor.withOpacity(.6),
+          style: TextButton.styleFrom(
+            primary: Theme.of(context).accentColor,
+            onSurface: Theme.of(context).accentColor,
+          ),
           onPressed: validAmount && amountController.text.isNotEmpty ? () {
+            num amount = eval.eval(Expression.parse(amountController.text.replaceAll(currency.decimalSeparator, '.')), {});
             var date = DateTime.now();
             var sdate = '${date.day}/${date.month}/${date.year}';
             expr.insert(0,
-                amountController.text + '~|~' +
+                double.parse(amount.toStringAsFixed(2)).toString() + '~|~' +
                     name + '~|~' +
                     descriptionController.text + '~|~' +
                     sdate);
@@ -1247,13 +1286,13 @@ class FullScreenState extends State<FullScreen>{
             title: Text('$action confirmation'),
             content: Text('Are you sure you want to ${action.toLowerCase()} the selected entries?'),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text('CANCEL',
                   style: TextStyle(color: Theme.of(context).accentColor),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              FlatButton(
+              TextButton(
                 child: Text('ACCEPT',
                   style: TextStyle(color: Theme.of(context).accentColor),
                 ),
@@ -1307,13 +1346,13 @@ class FullScreenState extends State<FullScreen>{
             autofocus: true,
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('CANCEL',
                 style: TextStyle(color: Theme.of(context).accentColor),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            FlatButton(
+            TextButton(
               child: Text('CHANGE',
                 style: TextStyle(color: Theme.of(context).accentColor),
               ),
@@ -1505,8 +1544,8 @@ class FullScreenState extends State<FullScreen>{
                                                     textAlign: TextAlign.end,
                                                     style: TextStyle(
                                                         color: here[i][0][0] == '-'
-                                                                ? Theme.of(context).errorColor
-                                                                : Theme.of(context).accentColor,
+                                                            ? Theme.of(context).errorColor
+                                                            : Theme.of(context).accentColor,
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 18.0
                                                     ),
@@ -1641,7 +1680,7 @@ class FullScreenState extends State<FullScreen>{
                 },
               ),
               Align(
-                alignment: Alignment.bottomRight,
+                  alignment: Alignment.bottomRight,
                   child:  Padding(
                       padding: activeBanner ?
                       EdgeInsets.fromLTRB(0, 0, 16, 76)
@@ -1650,7 +1689,7 @@ class FullScreenState extends State<FullScreen>{
                       child: FloatingActionButton(
                         onPressed: () => showDialog(
                             context: context,
-                          builder: (context) => _addItemDialog(todo)
+                            builder: (context) => _AddItemDialog(todo)
                         ).then((_) {setState(() {});}),
                         child: Icon(Icons.add),
                       )
@@ -1670,8 +1709,8 @@ class FullScreen extends StatefulWidget {
 
 notificationDialog(context, d) async {
   TimeOfDay time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: 0, minute: 10),
+    context: context,
+    initialTime: TimeOfDay(hour: 0, minute: 10),
   );
 
   if (time != null) {
@@ -1681,12 +1720,12 @@ notificationDialog(context, d) async {
         0,
         int.parse(d[0]) > 0 ? 'Get you money back!' : 'You have to give some money back!',
         int.parse(d[0]) > 0 ?
-          '${d[1]} owes you ${d[0]}${currency.symbol}'
-              :
-          'You owe ${d[1]} ${d[0].slice(1)}${currency.symbol}',
+        '${d[1]} owes you ${d[0]}${currency.symbol}'
+            :
+        'You owe ${d[1]} ${d[0].slice(1)}${currency.symbol}',
         dt,
         notiDetails
     );
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text('Reminder set!')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Reminder set!')));
   }
 }
