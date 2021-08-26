@@ -47,9 +47,12 @@ android {
         applicationId "tk.roman910.debt"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 8
-        versionName '1.3.2'
+        versionCode 9
+        versionName '1.3.3'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            debugSymbolLevel 'FULL'
+        }
     }
 
     signingConfigs {

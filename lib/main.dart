@@ -58,12 +58,39 @@ List<AboutTile> aboutInfo = [
 
 ThemeData lightTheme = ThemeData(
     errorColor: Colors.red,
-    primarySwatch: Colors.green,
-    accentColor: Colors.green,
-    buttonColor: Colors.green,
     cardColor: Colors.white,
     primaryTextTheme: TextTheme(
-        headline6: TextStyle(color: Colors.green, fontFamily: 'Roboto', fontWeight: FontWeight.w500)
+      headline6: TextStyle(color: Colors.green, fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+    ),
+    appBarTheme: AppBarTheme(
+      titleTextStyle: TextStyle(color: Colors.green, fontSize: 20,
+          letterSpacing: 0.15, fontWeight: FontWeight.w500),
+    ),
+    textTheme: TextTheme(
+      bodyText2: TextStyle(fontFamily: 'Roboto'),
+      bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+      button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+      headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
+    ),
+    primaryIconTheme: IconThemeData(color: Colors.green),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: Colors.green,
+      selectionHandleColor: Colors.green,
+      selectionColor: Colors.green,
+    ),
+    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green).copyWith(secondary: Colors.green)
+);
+
+ThemeData darkTheme = ThemeData(
+    errorColor: Colors.red[200],
+    // primaryColor: Color(0xff404040),
+    // cardColor:  Color(0xff404040),
+    primaryTextTheme: TextTheme(
+        headline6: TextStyle(color: Colors.green[200], fontFamily: 'Roboto', fontWeight: FontWeight.w500)
+    ),
+    appBarTheme: AppBarTheme(
+      titleTextStyle: TextStyle(color: Colors.green[200], fontSize: 20,
+          letterSpacing: 0.15, fontWeight: FontWeight.w500),
     ),
     textTheme: TextTheme(
         bodyText2: TextStyle(fontFamily: 'Roboto'),
@@ -71,37 +98,20 @@ ThemeData lightTheme = ThemeData(
         button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
         headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
     ),
-    primaryIconTheme: IconThemeData(color: Colors.green),
+    primaryIconTheme: IconThemeData(color: Colors.green[200]),
     textSelectionTheme: TextSelectionThemeData(
-      cursorColor: Colors.green,
-      selectionHandleColor: Colors.green,
-      selectionColor: Colors.green,
+      cursorColor: Colors.green[200],
+      selectionHandleColor: Colors.green[200],
+      selectionColor: Colors.green[200],
+    ),
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.fromSwatch(
+      primarySwatch: MaterialColor(Colors.green[200].value, {}),
+      accentColor: Colors.green[200],
+      brightness: Brightness.dark,
+      errorColor: Colors.red[200],
+      cardColor:  Color(0xff404040),
     )
-);
-
-ThemeData darkTheme = ThemeData(
-  errorColor: Colors.red[200],
-  primarySwatch: MaterialColor(Colors.green[200].value, {}),
-  accentColor: Colors.green[200],
-  primaryColor: Color(0xff404040),
-  cardColor:  Color(0xff404040),
-  buttonColor: Colors.green[200],
-  primaryTextTheme: TextTheme(
-      headline6: TextStyle(color: Colors.green[200], fontFamily: 'Roboto', fontWeight: FontWeight.w500)
-  ),
-  textTheme: TextTheme(
-      bodyText2: TextStyle(fontFamily: 'Roboto'),
-      bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
-  ),
-  primaryIconTheme: IconThemeData(color: Colors.green[200]),
-  textSelectionTheme: TextSelectionThemeData(
-    cursorColor: Colors.green[200],
-    selectionHandleColor: Colors.green[200],
-    selectionColor: Colors.green[200],
-  ),
-  brightness: Brightness.dark,
 );
 
 updateData() async {
@@ -131,7 +141,7 @@ Widget aboutSheet(context) {
         Container(
             transform: Matrix4.translationValues(0, -40, 0),
             decoration: BoxDecoration(
-                color: Theme.of(context).accentColor,
+                color: Theme.of(context).colorScheme.secondary,
                 borderRadius: BorderRadius.all(Radius.circular(50)),
                 boxShadow: [BoxShadow(
                   color: Colors.black.withOpacity(.16),
@@ -147,7 +157,7 @@ Widget aboutSheet(context) {
         ),
         Text('Román Via-Dufresne Saus',
           style: TextStyle(
-              color: Theme.of(context).accentColor,
+              color: Theme.of(context).colorScheme.secondary,
               fontFamily: 'ProductSans',
               fontSize: 24
           ),
@@ -216,9 +226,9 @@ class MoneyListState extends State<MoneyList>{
 
   @override
   void initState(){
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //   statusBarColor: Colors.transparent,
+    // ));
     super.initState();
     _loadData();
     if (!kIsWeb) {
@@ -293,7 +303,7 @@ class MoneyListState extends State<MoneyList>{
       locale = Platform.localeName;
     }
     if (selected.length == 0) {
-      appBarActions = [IconButton(icon: Icon(Icons.add, color: Theme.of(context).accentColor), onPressed: () {
+      appBarActions = [IconButton(icon: Icon(Icons.add, color: Theme.of(context).colorScheme.secondary), onPressed: () {
         Navigator.of(context).push(MaterialPageRoute<String>(
             builder: (context) {
               return AddDialog();
@@ -355,7 +365,7 @@ class MoneyListState extends State<MoneyList>{
                                           title: Text('${themes[i].substring(0,1).toUpperCase()}${themes[i].substring(1)}'),
                                           value: themes[i],
                                           groupValue: option,
-                                          activeColor: Theme.of(context).accentColor,
+                                          activeColor: Theme.of(context).colorScheme.secondary,
                                           onChanged: (val) {
                                             setState(() {
                                               option = val;
@@ -368,11 +378,11 @@ class MoneyListState extends State<MoneyList>{
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
+                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
+                            child: Text('SET', style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
                             onPressed: () {
                               theme.value = option;
                               updateData();
@@ -432,7 +442,7 @@ class MoneyListState extends State<MoneyList>{
                                               groupValue: option,
                                               activeColor: Theme
                                                   .of(context)
-                                                  .accentColor,
+                                                  .colorScheme.secondary,
                                               onChanged: (val) {
                                                 setState(() {
                                                   option = val;
@@ -495,11 +505,11 @@ class MoneyListState extends State<MoneyList>{
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).accentColor),),
+                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: Text('SET', style: TextStyle(color: Theme.of(context).accentColor)),
+                            child: Text('SET', style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
                             onPressed: () {
                               if (!customCurrency) {
                                 if (option == null) {
@@ -540,14 +550,14 @@ class MoneyListState extends State<MoneyList>{
                                 child: Text(
                                   'CANCEL', style: TextStyle(color: Theme
                                     .of(context)
-                                    .accentColor),),
+                                    .colorScheme.secondary),),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
                               TextButton(
                                 child: Text(
                                     'HIDE', style: TextStyle(color: Theme
                                     .of(context)
-                                    .accentColor)),
+                                    .colorScheme.secondary)),
                                 onPressed: () {
                                   try {
                                     showAds = false;
@@ -603,10 +613,14 @@ class MoneyListState extends State<MoneyList>{
       key: _scaffoldKey,
       appBar: AppBar(
         title: appBarTitle,
-        brightness: Theme.of(context).brightness,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarBrightness: Theme.of(context).brightness,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
+        ),
         backgroundColor: Theme.of(context).bottomAppBarColor,
         actions: appBarActions,
-        iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
         leading: appBarLeading,
       ),
       body: Builder(
@@ -676,13 +690,13 @@ class MoneyListState extends State<MoneyList>{
             actions: <Widget>[
               TextButton(
                 child: Text('CANCEL',
-                  style: TextStyle(color: Theme.of(context).accentColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
                 child: Text('ACCEPT',
-                  style: TextStyle(color: Theme.of(context).accentColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () {
                   switch(action) {
@@ -745,19 +759,21 @@ class MoneyListState extends State<MoneyList>{
           title: Text('Edit Item'),
           content: TextField(
             controller: controller,
-            textCapitalization: TextCapitalization.words,
             autofocus: true,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(25)
+            ],
           ),
           actions: <Widget>[
             TextButton(
               child: Text('CANCEL',
-                style: TextStyle(color: Theme.of(context).accentColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: Text('CHANGE',
-                style: TextStyle(color: Theme.of(context).accentColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () {
                 if (controller.text != '') {
@@ -790,12 +806,12 @@ class MoneyListState extends State<MoneyList>{
   }
 
   Widget _buildRow(i, context){
-    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).accentColor,), onPressed: () => _editDialog(context));
-    // var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).accentColor), onPressed: () => _notYetSnack(Scaffold.of(context)));
+    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _editDialog(context));
+    // var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).colorScheme.secondary), onPressed: () => _notYetSnack(Scaffold.of(context)));
     var iconNoti = Container();
-    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).accentColor,), onPressed: () => _confirmDialog(context, 'Check'));
+    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _confirmDialog(context, 'Check'));
     var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
-    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).accentColor), onPressed: () => _confirmDialog(context, 'Delete'));
+    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary), onPressed: () => _confirmDialog(context, 'Delete'));
 
     var x = 'ERROR';
     var y = 'ERROR';
@@ -853,7 +869,7 @@ class MoneyListState extends State<MoneyList>{
               selected = [i < nums.length ? x : y];
               appBarTitle = Text(i < nums.length ? x : y);
               appBarActions = [iconEdit, iconNoti, nums.keys.contains(i < nums.length ? x : y) ? iconCheck : iconUncheck, iconDelete];
-              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).accentColor,), onPressed: _exitSelectMode);
+              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
             });
           },
           child: Card(
@@ -894,7 +910,7 @@ class MoneyListState extends State<MoneyList>{
                                 child: Text(i < nums.length ? cf.format(nums[x], currency, compact: nums[x] >= 10, decimal: 2) : '',
                                   textAlign: TextAlign.end,
                                   style: TextStyle(
-                                      color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor,
+                                      color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).colorScheme.secondary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18.0
                                   ),
@@ -938,8 +954,12 @@ class AddDialogState extends State<AddDialog>{
         appBar: AppBar(
           title: Text('Add Entry'),
           backgroundColor: Theme.of(context).bottomAppBarColor,
-          brightness: Theme.of(context).brightness,
-          iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarBrightness: Theme.of(context).brightness,
+              statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
+          ),
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
           actions: <Widget>[
             Builder(
                 builder: (context) {
@@ -949,7 +969,7 @@ class AddDialogState extends State<AddDialog>{
                               .of(context)
                               .textTheme
                               .subtitle2
-                              .copyWith(color: Theme.of(context).accentColor)),
+                              .copyWith(color: Theme.of(context).colorScheme.secondary)),
                       onPressed: () {
                         if (amountController.text.isNotEmpty &&
                             nameController.text.isNotEmpty) {
@@ -1015,7 +1035,7 @@ class AddDialogState extends State<AddDialog>{
                                             }
                                           });
                                         },
-                                        cursorColor: validName ? Theme.of(context).accentColor : Theme.of(context).errorColor,
+                                        cursorColor: validName ? Theme.of(context).colorScheme.secondary : Theme.of(context).errorColor,
                                         decoration: InputDecoration(
                                           labelText: 'Name',
                                           border: OutlineInputBorder(),
@@ -1046,7 +1066,7 @@ class AddDialogState extends State<AddDialog>{
                                           num amount = eval.eval(Expression.parse(val), {});
                                           // double.parse(eval.eval(Expression.parse(val), {}));
                                           setState(() {
-                                            validAmount =  amount != double.infinity;
+                                            validAmount =  amount != double.infinity && amount != null;
                                           });
                                         } catch(e) {
                                           print('\tERROR:\t$e');
@@ -1056,7 +1076,7 @@ class AddDialogState extends State<AddDialog>{
                                         }
                                       },
                                       // keyboardType: iOSWeb ? TextInputType.text : TextInputType.datetime,
-                                      cursorColor: validAmount ? Theme.of(context).accentColor : Theme.of(context).errorColor,
+                                      cursorColor: validAmount ? Theme.of(context).colorScheme.secondary : Theme.of(context).errorColor,
                                       decoration: InputDecoration(
                                         labelText: currency.symbol,
                                         border: OutlineInputBorder(),
@@ -1068,11 +1088,11 @@ class AddDialogState extends State<AddDialog>{
                               ],
                             ),TextField(
                               controller: descriptionController,
-                              maxLines: 3,
-                              maxLength: 100,
+                              maxLines: 1,
+                              maxLength: 35,
                               decoration: InputDecoration(
                                   labelText: 'Description',
-                                  border: OutlineInputBorder()
+                                  border: OutlineInputBorder(),
                               ),
                             ),
                           ],
@@ -1141,7 +1161,7 @@ class _AddItemDialogState extends State{
                         val = val.replaceAll(currency.decimalSeparator, '.');
                         num amount = eval.eval(Expression.parse(val), {});
                         setState(() {
-                          validAmount = amount != double.infinity;
+                          validAmount = amount != double.infinity && amount != null;
                         });
                       } on Exception {
                         setState(() {
@@ -1153,7 +1173,7 @@ class _AddItemDialogState extends State{
                     // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
                     cursorColor: validAmount ? Theme
                         .of(context)
-                        .accentColor : Theme
+                        .colorScheme.secondary : Theme
                         .of(context)
                         .errorColor,
                     decoration: InputDecoration(
@@ -1168,15 +1188,15 @@ class _AddItemDialogState extends State{
       actions: <Widget>[
         TextButton(
           child: Text('CANCEL',
-            style: TextStyle(color: Theme.of(context).accentColor),
+            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
           ),
           onPressed: ()=> Navigator.of(context).pop(),
         ),
         TextButton(
           child: Text('ADD'),
           style: TextButton.styleFrom(
-            primary: Theme.of(context).accentColor,
-            onSurface: Theme.of(context).accentColor,
+            primary: Theme.of(context).colorScheme.secondary,
+            onSurface: Theme.of(context).colorScheme.secondary,
           ),
           onPressed: validAmount && amountController.text.isNotEmpty ? () {
             num amount = eval.eval(Expression.parse(amountController.text.replaceAll(currency.decimalSeparator, '.')), {});
@@ -1288,13 +1308,13 @@ class FullScreenState extends State<FullScreen>{
             actions: <Widget>[
               TextButton(
                 child: Text('CANCEL',
-                  style: TextStyle(color: Theme.of(context).accentColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
                 child: Text('ACCEPT',
-                  style: TextStyle(color: Theme.of(context).accentColor),
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () {
                   var tot = expr + dexpr;
@@ -1342,19 +1362,21 @@ class FullScreenState extends State<FullScreen>{
           title: Text('Edit Item'),
           content: TextField(
             controller: controller,
-            textCapitalization: TextCapitalization.words,
             autofocus: true,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(35)
+            ],
           ),
           actions: <Widget>[
             TextButton(
               child: Text('CANCEL',
-                style: TextStyle(color: Theme.of(context).accentColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: Text('CHANGE',
-                style: TextStyle(color: Theme.of(context).accentColor),
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () {
                 var tot = expr + dexpr;
@@ -1392,12 +1414,12 @@ class FullScreenState extends State<FullScreen>{
 
   @override
   Widget build(BuildContext context) {
-    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).accentColor,), onPressed: () => _editDialog(context));
-    //var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).accentColor), onPressed: () => _notYetSnack(Scaffold.of(context)));
+    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _editDialog(context));
+    //var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).colorScheme.secondary), onPressed: () => _notYetSnack(Scaffold.of(context)));
     var iconNoti = Container();
-    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).accentColor,), onPressed: () => _confirmDialog(context, 'Check'));
+    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _confirmDialog(context, 'Check'));
     var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
-    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).accentColor), onPressed: () => _confirmDialog(context, 'Delete'));
+    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary), onPressed: () => _confirmDialog(context, 'Delete'));
     here = [];
     dhere = [];
     total = 0;
@@ -1424,9 +1446,13 @@ class FullScreenState extends State<FullScreen>{
         appBar: AppBar(
           title: appBarTitle,
           backgroundColor: Theme.of(context).bottomAppBarColor,
-          brightness: Theme.of(context).brightness,
+          systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarBrightness: Theme.of(context).brightness,
+              statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
+          ),
           actions: appBarActions,
-          iconTheme: IconThemeData(color: Theme.of(context).accentColor),
+          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
           leading: appBarLeading,
         ),
         body: Stack(
@@ -1448,7 +1474,7 @@ class FullScreenState extends State<FullScreen>{
                             Text(cf.format(total, currency), style: TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
-                                color: '$total'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).accentColor
+                                color: '$total'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).colorScheme.secondary
                             ),)
                           ],
                         ));
@@ -1504,7 +1530,7 @@ class FullScreenState extends State<FullScreen>{
                                 selected = [i];
                                 appBarTitle = Text('1 item');
                                 appBarActions = [iconEdit, iconNoti, iconCheck, iconDelete];
-                                appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).accentColor,), onPressed: _exitSelectMode);
+                                appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
                               });
                             },
                             child: Card(
@@ -1545,7 +1571,7 @@ class FullScreenState extends State<FullScreen>{
                                                     style: TextStyle(
                                                         color: here[i][0][0] == '-'
                                                             ? Theme.of(context).errorColor
-                                                            : Theme.of(context).accentColor,
+                                                            : Theme.of(context).colorScheme.secondary,
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: 18.0
                                                     ),
@@ -1611,7 +1637,7 @@ class FullScreenState extends State<FullScreen>{
                               selected = [k];
                               appBarTitle = Text('1 item');
                               appBarActions = [iconEdit, iconNoti, iconUncheck, iconDelete];
-                              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).accentColor,), onPressed: _exitSelectMode);
+                              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
                             });
                           },
                           child: Card(

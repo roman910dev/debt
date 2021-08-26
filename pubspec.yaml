@@ -28,9 +28,10 @@ dependencies:
   flutter_svg: ^0.22.0
   url_launcher: ^5.4.7
   flutter_share: ^1.0.2
-  currency_formatter: ^1.1.0
+  currency_formatter: ^1.1.1
   expressions: ^0.2.3
-#    path: 'C:\Users\roman_79tdu\Data\Coding\Flutter\currencies'
+#  currency_formatter:
+#    path: 'C:\Users\rvds9\Documents\Data\Coding\Flutter\currency_formatter'
 
 dev_dependencies:
   flutter_test:
