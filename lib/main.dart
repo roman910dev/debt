@@ -114,7 +114,7 @@ ThemeData darkTheme = ThemeData(
     )
 );
 
-updateData() async {
+void updateData() async {
   var prefs = await SharedPreferences.getInstance();
   prefs.setStringList('expr', expr);
   prefs.setStringList('dexpr', dexpr);
@@ -230,34 +230,34 @@ class MoneyListState extends State<MoneyList>{
     //   statusBarColor: Colors.transparent,
     // ));
     super.initState();
-    _loadData();
-    if (!kIsWeb) {
-      if (Platform.isAndroid && showAds) {
+    _loadData().then((_) {
+      if (!kIsWeb) {
         FirebaseAdMob.instance.initialize(
             appId: 'ca-app-pub-8832562785647597~3542311842');
-
-        banner = BannerAd(
-          adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-          // adUnitId: BannerAd.testAdUnitId,
-          size: AdSize.smartBanner,
-          listener: (event) {
-            if (event == MobileAdEvent.loaded) {
-              setState(() {
-                activeBanner = true;
-              });
-            } else if (event == MobileAdEvent.failedToLoad) {
-              setState(() {
-                activeBanner = false;
-              });
-            }
-          },
-        );
-        banner..load()..show();
+        if (Platform.isAndroid && showAds) {
+          banner = BannerAd(
+            adUnitId: 'ca-app-pub-8832562785647597/8322552151',
+            // adUnitId: BannerAd.testAdUnitId,
+            size: AdSize.smartBanner,
+            listener: (event) {
+              if (event == MobileAdEvent.loaded) {
+                setState(() {
+                  activeBanner = true;
+                });
+              } else if (event == MobileAdEvent.failedToLoad) {
+                setState(() {
+                  activeBanner = false;
+                });
+              }
+            },
+          );
+          banner..load()..show();
+        }
       }
-    }
+    });
   }
 
-  _loadData() async {
+  Future<bool> _loadData() async {
     var prefs = await SharedPreferences.getInstance();
     String symbol = prefs.getString('currencySymbol');
     if (symbol == null) {
@@ -282,6 +282,7 @@ class MoneyListState extends State<MoneyList>{
       theme.value = prefs.getString('theme') ?? 'system';
       showAds = prefs.getBool('showAds') ?? true;
     });
+    return true;
   }
 
 
@@ -1058,18 +1059,18 @@ class AddDialogState extends State<AddDialog>{
                                       onChanged: (val) {
                                         try {
                                           val = val.replaceAll(currency.decimalSeparator, '.');
-                                          print('\tVAL:\t$val');
-                                          print('\tEVAL:\t${eval.eval(Expression.parse(val), {})}');
-                                          print('\tTYPE:\t${eval.eval(Expression.parse(val), {}).runtimeType}');
-                                          // print('\tPARSE:\t${double.parse(eval.eval(Expression.parse(val), {}))}');
-                                          print('\n');
+                                          // print('\tVAL:\t$val');
+                                          // print('\tEVAL:\t${eval.eval(Expression.parse(val), {})}');
+                                          // print('\tTYPE:\t${eval.eval(Expression.parse(val), {}).runtimeType}');
+                                          // // print('\tPARSE:\t${double.parse(eval.eval(Expression.parse(val), {}))}');
+                                          // print('\n');
                                           num amount = eval.eval(Expression.parse(val), {});
                                           // double.parse(eval.eval(Expression.parse(val), {}));
                                           setState(() {
                                             validAmount =  amount != double.infinity && amount != null;
                                           });
                                         } catch(e) {
-                                          print('\tERROR:\t$e');
+                                          // print('\tERROR:\t$e');
                                           setState(() {
                                             validAmount = false;
                                           });
