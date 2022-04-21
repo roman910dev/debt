@@ -1,5 +1,7 @@
-import 'dart:io' show Platform;
-
+import 'dart:io';
+import 'package:currency_formatter/currency_formatter.dart';
+import 'package:debt/tools.dart';
+import 'package:expressions/expressions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +10,6 @@ import 'package:flutter_share/flutter_share.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:currency_formatter/currency_formatter.dart';
-import 'package:expressions/expressions.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -18,7 +17,17 @@ bool iOSWeb = false;
 
 ExpressionEvaluator eval = ExpressionEvaluator();
 
-var header = TextStyle(fontSize: 20.0, color: Color(0xde000000), fontWeight: FontWeight.bold);
+TextStyle safariStyle({Color color, FontWeight fontWeight}) => TextStyle(
+    decoration: TextDecoration.underline,
+    decorationColor: Colors.white.withOpacity(.01),
+    fontFamily: 'Roboto',
+    fontFamilyFallback: const ['Helvetica', 'Arial', 'sans-serif'],
+    color: color,
+    fontWeight: fontWeight
+);
+
+var header = TextStyle(
+    fontSize: 20.0, color: Color(0xde000000), fontWeight: FontWeight.bold);
 Map<String, num> nums = Map<String, num>();
 var dates = Map();
 var ddates = Map();
@@ -50,47 +59,90 @@ class AboutTile {
 }
 
 List<AboutTile> aboutInfo = [
-  AboutTile(Icons.share, 'Tell your friends about this app', 'Share this app', 'share'),
-  AboutTile(Icons.web, 'Visit my website', 'https://roman910.tk', 'https://roman910.tk'),
-  AboutTile(Icons.shop, 'Check out my other Android apps', 'Google Play Store', 'https://play.google.com/store/apps/developer?id=Rom%C3%A1n+Via-Dufresne+Saus'),
-  AboutTile(Icons.email, 'Reach me out', 'roman910dev@gmail.com', 'mailto:roman910dev@gmail.com?subject=Debt Tracker Feedback'),
+  AboutTile(Icons.share, 'Tell your friends about this app', 'Share this app',
+      'share'),
+  AboutTile(Icons.web, 'Visit my website', 'https://roman910.tk',
+      'https://roman910.tk'),
+  AboutTile(Icons.shop, 'Check out my other Android apps', 'Google Play Store',
+      'https://play.google.com/store/apps/developer?id=Rom%C3%A1n+Via-Dufresne+Saus'),
+  AboutTile(Icons.email, 'Reach me out', 'roman910dev@gmail.com',
+      'mailto:roman910dev@gmail.com?subject=Debt Tracker Feedback'),
 ];
 
 ThemeData lightTheme = ThemeData(
-    errorColor: Colors.red,
-    cardColor: Colors.white,
-    primaryTextTheme: TextTheme(
-      headline6: TextStyle(color: Colors.green, fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-    ),
-    appBarTheme: AppBarTheme(
-      titleTextStyle: TextStyle(color: Colors.green, fontSize: 20,
-          letterSpacing: 0.15, fontWeight: FontWeight.w500),
-    ),
-    textTheme: TextTheme(
-      bodyText2: TextStyle(fontFamily: 'Roboto'),
-      bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-      headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-    ),
-    primaryIconTheme: IconThemeData(color: Colors.green),
-    textSelectionTheme: TextSelectionThemeData(
-      cursorColor: Colors.green,
-      selectionHandleColor: Colors.green,
-      selectionColor: Colors.green,
-    ),
-    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green).copyWith(secondary: Colors.green)
+  // fontFamily: iOSWeb
+  //     ? '--apple-system'
+  //     : null,
+  errorColor: Colors.red,
+  cardColor: Colors.white,
+  primaryTextTheme: TextTheme(
+      headline1: safariStyle(),
+      headline2: safariStyle(),
+      headline3: safariStyle(),
+      headline4: safariStyle(),
+      headline5: safariStyle(),
+      headline6: safariStyle(
+          color: Colors.green,
+          fontWeight: FontWeight.w500
+      ),
+      subtitle1: safariStyle(),
+      subtitle2: safariStyle(),
+      bodyText1: safariStyle(),
+      bodyText2: safariStyle(),
+      caption: safariStyle(),
+      button: safariStyle(),
+      overline: safariStyle()
+  ),
+  appBarTheme: AppBarTheme(
+    titleTextStyle: TextStyle(
+        color: Colors.green,
+        fontSize: 20,
+        letterSpacing: 0.15,
+        fontWeight: FontWeight.w500),
+  ),
+  textTheme: TextTheme(
+      headline1: safariStyle(),
+      headline2: safariStyle(),
+      headline3: safariStyle(),
+      headline4: safariStyle(),
+      headline5: safariStyle(),
+      headline6: safariStyle(),
+      subtitle1: safariStyle(),
+      subtitle2: safariStyle(),
+      bodyText1: safariStyle(fontWeight: FontWeight.w500),
+      bodyText2: safariStyle(),
+      caption: safariStyle(),
+      button: safariStyle(fontWeight: FontWeight.w500),
+      overline: safariStyle()
+  ),
+  primaryIconTheme: IconThemeData(color: Colors.green),
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: Colors.green,
+    selectionHandleColor: Colors.green,
+    selectionColor: Colors.green,
+  ),
+  colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
+      .copyWith(secondary: Colors.green),
 );
 
 ThemeData darkTheme = ThemeData(
+  // fontFamily: iOSWeb
+  //     ? '-apple-system'
+  //     : null,
     errorColor: Colors.red[200],
     // primaryColor: Color(0xff404040),
     // cardColor:  Color(0xff404040),
     primaryTextTheme: TextTheme(
-        headline6: TextStyle(color: Colors.green[200], fontFamily: 'Roboto', fontWeight: FontWeight.w500)
-    ),
+        headline6: TextStyle(
+            color: Colors.green[200],
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.w500)),
     appBarTheme: AppBarTheme(
-      titleTextStyle: TextStyle(color: Colors.green[200], fontSize: 20,
-          letterSpacing: 0.15, fontWeight: FontWeight.w500),
+      titleTextStyle: TextStyle(
+          color: Colors.green[200],
+          fontSize: 20,
+          letterSpacing: 0.15,
+          fontWeight: FontWeight.w500),
     ),
     textTheme: TextTheme(
         bodyText2: TextStyle(fontFamily: 'Roboto'),
@@ -110,9 +162,8 @@ ThemeData darkTheme = ThemeData(
       accentColor: Colors.green[200],
       brightness: Brightness.dark,
       errorColor: Colors.red[200],
-      cardColor:  Color(0xff404040),
-    )
-);
+      cardColor: Color(0xff404040),
+    ));
 
 void updateData() async {
   var prefs = await SharedPreferences.getInstance();
@@ -123,10 +174,21 @@ void updateData() async {
   if (cf.majors.values.contains(currency)) {
     prefs.setString('currencySymbol', localCurrency ? null : currency.symbol);
   } else {
-    prefs.setString('currencySymbol', '${currency.symbolSide == SymbolSide.left ? 'l' : 'r'}${currency.symbol}');
+    prefs.setString('currencySymbol',
+        '${currency.symbolSide == SymbolSide.left ? 'l' : 'r'}${currency.symbol}');
   }
 }
 
+String date2String(DateTime date) => '${date.day}/${date.month}/${date.year}';
+
+DateTime string2Date(String date) => DateTime(
+  int.parse(date.split('/')[2]),
+  int.parse(date.split('/')[1]),
+  int.parse(date.split('/')[0]),
+);
+
+Color bgColor(BuildContext context) => Colors.black
+    .withOpacity(Theme.of(context).brightness == Brightness.light ? .05 : .1);
 
 Widget aboutSheet(context) {
   return Container(
@@ -134,7 +196,8 @@ Widget aboutSheet(context) {
     width: MediaQuery.of(context).size.width,
     decoration: BoxDecoration(
       color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30), topRight: Radius.circular(30)),
     ),
     child: Column(
       children: [
@@ -143,24 +206,24 @@ Widget aboutSheet(context) {
             decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondary,
                 borderRadius: BorderRadius.all(Radius.circular(50)),
-                boxShadow: [BoxShadow(
-                  color: Colors.black.withOpacity(.16),
-                  offset: Offset(0, -10),
-                  blurRadius: 24,
-                )]
-            ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.16),
+                    offset: Offset(0, -10),
+                    blurRadius: 24,
+                  )
+                ]),
             child: SvgPicture.asset(
               'assets/logo.svg',
               width: 80,
               color: Theme.of(context).cardColor,
-            )
-        ),
-        Text('Román Via-Dufresne Saus',
+            )),
+        Text(
+          'Román Via-Dufresne Saus',
           style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontFamily: 'ProductSans',
-              fontSize: 24
-          ),
+              fontSize: 24),
         ),
         Padding(
             padding: EdgeInsets.only(top: 32, left: 16),
@@ -173,19 +236,24 @@ Widget aboutSheet(context) {
                       itemCount: 4,
                       itemBuilder: (context, i) {
                         return ListTile(
-                          leading: Icon(aboutInfo[i].leading, color: Theme.of(context).textTheme.bodyText2.color,),
-                          title: Text(aboutInfo[i].title, style: TextStyle(
-                              fontSize: 16
-                          ),),
+                          leading: Icon(
+                            aboutInfo[i].leading,
+                            color: Theme.of(context).textTheme.bodyText2.color,
+                          ),
+                          title: Text(
+                            aboutInfo[i].title,
+                            style: TextStyle(fontSize: 16),
+                          ),
                           subtitle: Text(aboutInfo[i].subtitle),
                           onTap: () async {
                             if (aboutInfo[i].action == 'share') {
                               FlutterShare.share(
                                   title: 'Debt Tracker',
                                   chooserTitle: 'Debt Tracker',
-                                  linkUrl: 'https://play.google.com/store/apps/details?id=tk.roman910.debt',
-                                  text: 'Hey! Check out this app. It helps me to keep track of my money.'
-                              );
+                                  linkUrl:
+                                  'https://play.google.com/store/apps/details?id=tk.roman910.debt',
+                                  text:
+                                  'Hey! Check out this app. It helps me to keep track of my money.');
                             } else {
                               String url = aboutInfo[i].action;
                               if (await canLaunch(url)) {
@@ -196,10 +264,8 @@ Widget aboutSheet(context) {
                             }
                           },
                         );
-                      })
-              ),
-            )
-        )
+                      })),
+            ))
       ],
     ),
   );
@@ -216,24 +282,22 @@ class MyApp extends StatelessWidget {
           title: 'Debt Tracker',
           home: MoneyList(),
           theme: theme == 'dark' ? darkTheme : lightTheme,
-          darkTheme: theme =='light' ? lightTheme : darkTheme,
-        )
-    );
+          darkTheme: theme == 'light' ? lightTheme : darkTheme,
+        ));
   }
 }
 
-class MoneyListState extends State<MoneyList>{
-
+class MoneyListState extends State<MoneyList> {
   @override
-  void initState(){
+  void initState() {
     // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     //   statusBarColor: Colors.transparent,
     // ));
     super.initState();
     _loadData().then((_) {
       if (!kIsWeb) {
-        FirebaseAdMob.instance.initialize(
-            appId: 'ca-app-pub-8832562785647597~3542311842');
+        FirebaseAdMob.instance
+            .initialize(appId: 'ca-app-pub-8832562785647597~3542311842');
         if (Platform.isAndroid && showAds) {
           banner = BannerAd(
             adUnitId: 'ca-app-pub-8832562785647597/8322552151',
@@ -251,7 +315,9 @@ class MoneyListState extends State<MoneyList>{
               }
             },
           );
-          banner..load()..show();
+          banner
+            ..load()
+            ..show();
         }
       }
     });
@@ -270,10 +336,11 @@ class MoneyListState extends State<MoneyList>{
         locale = Platform.localeName;
       }
     } else {
-      currency = cf.getFromSymbol(symbol) ?? CurrencyFormatterSettings(
-          symbol: symbol.substring(1),
-          symbolSide: symbol.startsWith('l') ? SymbolSide.left : SymbolSide.right
-      );
+      currency = cf.getFromSymbol(symbol) ??
+          CurrencyFormatterSettings(
+              symbol: symbol.substring(1),
+              symbolSide:
+              symbol.startsWith('l') ? SymbolSide.left : SymbolSide.right);
       localCurrency = false;
     }
     setState(() {
@@ -284,8 +351,6 @@ class MoneyListState extends State<MoneyList>{
     });
     return true;
   }
-
-
 
   var appBarActions;
   var appBarTitle = Text('Debt Tracker');
@@ -298,52 +363,45 @@ class MoneyListState extends State<MoneyList>{
 
   @override
   Widget build(BuildContext context) {
-    iOSWeb = kIsWeb && Theme.of(context).platform == TargetPlatform.iOS;
+    iOSWeb = kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     if (localCurrency && Platform.localeName != locale) {
       currency = cf.getLocal();
       locale = Platform.localeName;
     }
     if (selected.length == 0) {
-      appBarActions = [IconButton(icon: Icon(Icons.add, color: Theme.of(context).colorScheme.secondary), onPressed: () {
-        Navigator.of(context).push(MaterialPageRoute<String>(
-            builder: (context) {
-              return AddDialog();
-            },
-            fullscreenDialog: true
-        )).then((_){setState(() {});});
-      }),
+      appBarActions = [
+        IconButton(
+            icon:
+            Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute<String>(
+                  builder: (context) {
+                    return AddDialog();
+                  },
+                  fullscreenDialog: true))
+                  .then((_) {
+                setState(() {});
+              });
+            }),
         PopupMenuButton(
           itemBuilder: (context) => kIsWeb
-          ?
-            [
-              PopupMenuItem(
-                  value: 1,
-                  child: Text('Set Theme')
-              ),
-              PopupMenuItem(
-                  value: 2,
-                  child: Text('Set Currency')
-              ),
-            ]
-          :
-            [
-              PopupMenuItem(
-                  value: 1,
-                  child: Text('Set Theme')
-              ),
-              PopupMenuItem(
-                  value: 2,
-                  child: Text('Set Currency')
-              ),
-              PopupMenuItem(
-                value: 3,
-                child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
-              ),
-              PopupMenuItem(
-                value: 4,
-                child: Text('About'),
-              )
-            ],
+              ? [
+            PopupMenuItem(value: 1, child: Text('Set Theme')),
+            PopupMenuItem(value: 2, child: Text('Set Currency')),
+          ]
+              : [
+            PopupMenuItem(value: 1, child: Text('Set Theme')),
+            PopupMenuItem(value: 2, child: Text('Set Currency')),
+            PopupMenuItem(
+              value: 3,
+              child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
+            ),
+            PopupMenuItem(
+              value: 4,
+              child: Text('About'),
+            )
+          ],
           onSelected: (value) {
             switch (value) {
               case 1:
@@ -353,37 +411,46 @@ class MoneyListState extends State<MoneyList>{
                     builder: (context) {
                       return AlertDialog(
                         title: Text('Choose Theme'),
-                        content: StatefulBuilder(
-                            builder: (context, setState) {
-                              return Container(
-                                  width: double.maxFinite,
-                                  constraints: BoxConstraints(maxHeight: 150),
-                                  child: ListView.builder(
-                                      itemCount: themes.length,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemBuilder: (context, i) {
-                                        return RadioListTile(
-                                          title: Text('${themes[i].substring(0,1).toUpperCase()}${themes[i].substring(1)}'),
-                                          value: themes[i],
-                                          groupValue: option,
-                                          activeColor: Theme.of(context).colorScheme.secondary,
-                                          onChanged: (val) {
-                                            setState(() {
-                                              option = val;
-                                            });},
-                                        );
-                                      }
-                                  )
-                              );
-                            }
-                        ),
+                        content: StatefulBuilder(builder: (context, setState) {
+                          return Container(
+                              width: double.maxFinite,
+                              constraints: BoxConstraints(maxHeight: 150),
+                              child: ListView.builder(
+                                  itemCount: themes.length,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, i) {
+                                    return RadioListTile(
+                                      title: Text(
+                                          '${themes[i].substring(0, 1).toUpperCase()}${themes[i].substring(1)}'),
+                                      value: themes[i],
+                                      groupValue: option,
+                                      activeColor: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          option = val;
+                                        });
+                                      },
+                                    );
+                                  }));
+                        }),
                         actions: <Widget>[
                           TextButton(
-                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+                            child: Text(
+                              'CANCEL',
+                              style: TextStyle(
+                                  color:
+                                  Theme.of(context).colorScheme.secondary),
+                            ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: Text('SET', style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
+                            child: Text('SET',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)),
                             onPressed: () {
                               theme.value = option;
                               updateData();
@@ -392,125 +459,137 @@ class MoneyListState extends State<MoneyList>{
                           )
                         ],
                       );
-                    }
-                );
+                    });
                 break;
               case 2:
-                CurrencyFormatterSettings option = localCurrency ? null : currency;
+                CurrencyFormatterSettings option =
+                localCurrency ? null : currency;
                 bool customCurrency = false;
                 String symbol = currency.symbol;
-                String side = currency.symbolSide == SymbolSide.left ? 'left' : 'right';
+                String side =
+                currency.symbolSide == SymbolSide.left ? 'left' : 'right';
                 showDialog(
                     context: context,
                     builder: (context) {
                       return AlertDialog(
                         title: Text('Choose Currency'),
-                        content: StatefulBuilder(
-                            builder: (context, setState) {
-                              num bannerHeight = banner == null ? 0 : banner.size.height;
-                              print(MediaQuery.of(context).size.height - bannerHeight - 256);
-                              if (!customCurrency) {
-                                return Container(
-                                    width: double.maxFinite,
-                                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - bannerHeight - 320),
-                                    child: ListView.builder(
-                                        itemCount: cf.majors.length + 2,
-                                        itemBuilder: (context, i) {
-                                          if (i == 0) {
-                                            return InkWell(
-                                                child: ListTile(
-                                                  leading: Icon(Icons.add),
-                                                  title: Text('Custom'),
-                                                  onTap: () =>
-                                                      setState(()=>customCurrency = true),
-                                                )
-                                            );
-                                          } else {
-                                            if (kIsWeb && i == 1) {
-                                              return Container();
-                                            }
-                                            return RadioListTile(
-                                              title: i == 1
-                                                  ? Text('System')
-                                                  : Text(
-                                                  cf.majorSymbols
-                                                      .values.elementAt(
-                                                      i - 2)),
-                                              value: i == 1
-                                                  ? null
-                                                  : cf.majors.values
-                                                  .elementAt(i - 2),
-                                              groupValue: option,
-                                              activeColor: Theme
-                                                  .of(context)
-                                                  .colorScheme.secondary,
-                                              onChanged: (val) {
-                                                setState(() {
-                                                  option = val;
-                                                });
-                                              },
-                                            );
-                                          }
+                        content: StatefulBuilder(builder: (context, setState) {
+                          num bannerHeight =
+                          banner == null ? 0 : banner.size.height;
+                          print(MediaQuery.of(context).size.height -
+                              bannerHeight -
+                              256);
+                          if (!customCurrency) {
+                            return Container(
+                                width: double.maxFinite,
+                                constraints: BoxConstraints(
+                                    maxHeight:
+                                    MediaQuery.of(context).size.height -
+                                        bannerHeight -
+                                        320),
+                                child: ListView.builder(
+                                    itemCount: cf.majors.length + 2,
+                                    itemBuilder: (context, i) {
+                                      if (i == 0) {
+                                        return InkWell(
+                                            child: ListTile(
+                                              leading: Icon(Icons.add),
+                                              title: Text('Custom'),
+                                              onTap: () => setState(
+                                                      () => customCurrency = true),
+                                            ));
+                                      } else {
+                                        if (kIsWeb && i == 1) {
+                                          return Container();
                                         }
-                                    )
-                                );
-                              } else {
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
+                                        return RadioListTile(
+                                          title: i == 1
+                                              ? Text('System')
+                                              : Text(cf.majorSymbols.values
+                                              .elementAt(i - 2)),
+                                          value: i == 1
+                                              ? null
+                                              : cf.majors.values
+                                              .elementAt(i - 2),
+                                          groupValue: option,
+                                          activeColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              option = val;
+                                            });
+                                          },
+                                        );
+                                      }
+                                    }));
+                          } else {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                    padding:
+                                    EdgeInsets.only(top: 8, bottom: 16),
+                                    child: Text(side == 'left'
+                                        ? '$symbol 9,999.99'
+                                        : '9.999,99 $symbol')),
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    Padding(
-                                        padding: EdgeInsets.only(top: 8, bottom: 16),
-                                        child: Text(side == 'left' ? '$symbol 9,999.99' : '9.999,99 $symbol')
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Flexible(
-                                            flex: 1,
-                                            child: TextFormField(
-                                              maxLength: 2,
-                                              initialValue: symbol,
-                                              decoration: InputDecoration(
-                                                  hintText: 'Symbol',
-                                                  counterText: '',
-                                                  border: InputBorder.none
-                                              ),
-                                              onChanged: (value) => setState(()=>symbol = value),
+                                    Flexible(
+                                        flex: 1,
+                                        child: TextFormField(
+                                          // maxLength: 2,
+                                          initialValue: symbol,
+                                          decoration: InputDecoration(
+                                              hintText: 'Symbol',
+                                              counterText: '',
+                                              border: InputBorder.none),
+                                          onChanged: (value) =>
+                                              setState(() => symbol = value),
+                                        )),
+                                    Flexible(
+                                        flex: 1,
+                                        child: DropdownButton(
+                                          value: side,
+                                          hint: Text('Side'),
+                                          items: [
+                                            DropdownMenuItem(
+                                              child: Text('Left'),
+                                              value: 'left',
+                                            ),
+                                            DropdownMenuItem(
+                                              child: Text('Right'),
+                                              value: 'right',
                                             )
-                                        ),
-                                        Flexible(
-                                            flex: 1,
-                                            child: DropdownButton(
-                                              value: side,
-                                              hint: Text('Side'),
-                                              items: [
-                                                DropdownMenuItem(
-                                                  child: Text('Left'),
-                                                  value: 'left',
-                                                ),
-                                                DropdownMenuItem(
-                                                  child: Text('Right'),
-                                                  value: 'right',
-                                                )
-                                              ],
-                                              onChanged: (value) => setState(() => side = value),
-                                              underline: Container(),
-                                            )
-                                        )
-                                      ],
-                                    )
+                                          ],
+                                          onChanged: (value) =>
+                                              setState(() => side = value),
+                                          underline: Container(),
+                                        ))
                                   ],
-                                );
-                              }
-                            }
-                        ),
+                                )
+                              ],
+                            );
+                          }
+                        }),
                         actions: <Widget>[
                           TextButton(
-                            child: Text('CANCEL', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+                            child: Text(
+                              'CANCEL',
+                              style: TextStyle(
+                                  color:
+                                  Theme.of(context).colorScheme.secondary),
+                            ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: Text('SET', style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
+                            child: Text('SET',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)),
                             onPressed: () {
                               if (!customCurrency) {
                                 if (option == null) {
@@ -524,8 +603,9 @@ class MoneyListState extends State<MoneyList>{
                               } else {
                                 currency = CurrencyFormatterSettings(
                                     symbol: symbol,
-                                    symbolSide: side == 'left' ? SymbolSide.left : SymbolSide.right
-                                );
+                                    symbolSide: side == 'left'
+                                        ? SymbolSide.left
+                                        : SymbolSide.right);
                                 localCurrency = false;
                               }
                               updateData();
@@ -534,46 +614,47 @@ class MoneyListState extends State<MoneyList>{
                           )
                         ],
                       );
-                    }
-                ).then((_) => setState((){}));
+                    }).then((_) => setState(() {}));
                 break;
               case 3:
                 if (showAds) {
                   showDialog(
                       context: context,
-                      builder: (context) =>
-                          AlertDialog(
-                            title: Text('Hide Ads (Free)'),
-                            content: Text(
-                                'You can hide all the ads of any of my apps with no cost at all. However, I would like you to consider keeping them as the very little money I get from showing them is my only profit for working on these apps.'),
-                            actions: [
-                              TextButton(
-                                child: Text(
-                                  'CANCEL', style: TextStyle(color: Theme
-                                    .of(context)
-                                    .colorScheme.secondary),),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                              TextButton(
-                                child: Text(
-                                    'HIDE', style: TextStyle(color: Theme
-                                    .of(context)
-                                    .colorScheme.secondary)),
-                                onPressed: () {
-                                  try {
-                                    showAds = false;
-                                    banner.dispose();
-                                    banner = null;
-                                  } catch (e) {
-                                    print('BANNER DISPOSE ERROR: $e');
-                                  }
-                                  updateData();
-                                  Navigator.of(context).pop();
-                                },
-                              )
-                            ],
+                      builder: (context) => AlertDialog(
+                        title: Text('Hide Ads (Free)'),
+                        content: Text(
+                            'You can hide all the ads of any of my apps with no cost at all. However, I would like you to consider keeping them as the very little money I get from showing them is my only profit for working on these apps.'),
+                        actions: [
+                          TextButton(
+                            child: Text(
+                              'CANCEL',
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondary),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          TextButton(
+                            child: Text('HIDE',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .secondary)),
+                            onPressed: () {
+                              try {
+                                showAds = false;
+                                banner.dispose();
+                                banner = null;
+                              } catch (e) {
+                                print('BANNER DISPOSE ERROR: $e');
+                              }
+                              updateData();
+                              Navigator.of(context).pop();
+                            },
                           )
-                  );
+                        ],
+                      ));
                 } else {
                   showAds = true;
                   banner = BannerAd(
@@ -592,7 +673,9 @@ class MoneyListState extends State<MoneyList>{
                       }
                     },
                   );
-                  banner..load()..show();
+                  banner
+                    ..load()
+                    ..show();
                   updateData();
                 }
                 break;
@@ -601,14 +684,15 @@ class MoneyListState extends State<MoneyList>{
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
                   context: context,
-                  builder:(context) {
+                  builder: (context) {
                     return aboutSheet(context);
                   },
                 );
                 break;
             }
           },
-        )];
+        )
+      ];
     }
     return Scaffold(
       key: _scaffoldKey,
@@ -617,15 +701,19 @@ class MoneyListState extends State<MoneyList>{
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarBrightness: Theme.of(context).brightness,
-          statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
+          statusBarIconBrightness:
+          Theme.of(context).brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
         ),
         backgroundColor: Theme.of(context).bottomAppBarColor,
         actions: appBarActions,
-        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+        iconTheme:
+        IconThemeData(color: Theme.of(context).colorScheme.secondary),
         leading: appBarLeading,
       ),
       body: Builder(
-        builder: (BuildContext context){
+        builder: (BuildContext context) {
           return _showList();
         },
       ),
@@ -633,30 +721,30 @@ class MoneyListState extends State<MoneyList>{
     );
   }
 
-  Widget _showList(){
-
+  Widget _showList() {
     _date(d) => int.parse(d.split('/').reversed.join());
 
     nums.clear();
     dates.clear();
     ddates.clear();
 
-    expr.forEach((e){
+    expr.forEach((e) {
       var f = e.split('~|~');
       nums[f[1]] = (nums[f[1]] ?? 0) + double.parse(f[0]);
       if (nums[f[1]] % 1 == 0) {
         nums[f[1]] = nums[f[1]].round();
       }
-      if(_date(f[3]) > (_date(dates[f[1]] ?? '0/0/0'))) dates[f[1]] = f[3];
+      if (_date(f[3]) > (_date(dates[f[1]] ?? '0/0/0'))) dates[f[1]] = f[3];
     });
 
-    dexpr.forEach((e){
+    dexpr.forEach((e) {
       var f = e.split('~|~');
-      if(nums[f[1]] == null) if(_date(f[3]) > (_date(ddates[f[1]] ?? '0/0/0'))) ddates[f[1]] = f[3];
+      if (nums[f[1]] == null) if (_date(f[3]) >
+          (_date(ddates[f[1]] ?? '0/0/0'))) ddates[f[1]] = f[3];
     });
 
     return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       itemCount: nums.length + ddates.length,
       itemBuilder: (context, i) {
         return _buildRow(i, context);
@@ -668,14 +756,21 @@ class MoneyListState extends State<MoneyList>{
     setState(() {
       selectMode = false;
       selected = [];
-      appBarActions = [IconButton(icon: Icon(Icons.add, color: Colors.green), onPressed: () {
-        Navigator.of(context).push(MaterialPageRoute<String>(
-            builder: (context){
-              return AddDialog();
-            },
-            fullscreenDialog: true
-        )).then((_){setState((){});});
-      })];
+      appBarActions = [
+        IconButton(
+            icon: Icon(Icons.add, color: Colors.green),
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute<String>(
+                  builder: (context) {
+                    return AddDialog();
+                  },
+                  fullscreenDialog: true))
+                  .then((_) {
+                setState(() {});
+              });
+            })
+      ];
       appBarLeading = null;
       appBarTitle = Text('Debt Tracker');
     });
@@ -687,23 +782,28 @@ class MoneyListState extends State<MoneyList>{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('$action confirmation'),
-            content: Text('Are you sure you want to ${action.toLowerCase()} multiple items?'),
+            content: Text(
+                'Are you sure you want to ${action.toLowerCase()} multiple items?'),
             actions: <Widget>[
               TextButton(
-                child: Text('CANCEL',
-                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                child: Text(
+                  'CANCEL',
+                  style:
+                  TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
-                child: Text('ACCEPT',
-                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                child: Text(
+                  'ACCEPT',
+                  style:
+                  TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () {
-                  switch(action) {
+                  switch (action) {
                     case 'Check':
                       var toMove = [];
-                      expr.forEach((e){
+                      expr.forEach((e) {
                         if (selected.contains(e.split('~|~')[1])) {
                           toMove.add(e);
                         }
@@ -716,7 +816,7 @@ class MoneyListState extends State<MoneyList>{
 
                     case 'Uncheck':
                       var toMove = [];
-                      dexpr.forEach((e){
+                      dexpr.forEach((e) {
                         if (selected.contains(e.split('~|~')[1])) {
                           toMove.add(e);
                         }
@@ -729,10 +829,16 @@ class MoneyListState extends State<MoneyList>{
 
                     case 'Delete':
                       var toDelete = [];
-                      expr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
+                      expr.forEach((e) {
+                        if (selected.contains(e.split('~|~')[1]))
+                          toDelete.add(e);
+                      });
                       toDelete.forEach((e) => expr.remove(e));
                       toDelete = [];
-                      dexpr.forEach((e) {if(selected.contains(e.split('~|~')[1])) toDelete.add(e);});
+                      dexpr.forEach((e) {
+                        if (selected.contains(e.split('~|~')[1]))
+                          toDelete.add(e);
+                      });
                       toDelete.forEach((e) => dexpr.remove(e));
                       break;
 
@@ -746,35 +852,37 @@ class MoneyListState extends State<MoneyList>{
               )
             ],
           );
-        }
-    );
+        });
   }
 
-  _editDialog(context){
+  _editDialog(context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         var controller = TextEditingController();
         controller.text = selected[0];
         return AlertDialog(
-          title: Text('Edit Item'),
+          title: Text('Edit Name'),
           content: TextField(
             controller: controller,
             autofocus: true,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(25)
-            ],
+            inputFormatters: [LengthLimitingTextInputFormatter(25)],
+            decoration: filledInputDecoration(null, context),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('CANCEL',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              child: Text(
+                'CANCEL',
+                style:
+                TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('CHANGE',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              child: Text(
+                'CHANGE',
+                style:
+                TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () {
                 if (controller.text != '') {
@@ -796,7 +904,9 @@ class MoneyListState extends State<MoneyList>{
                   _exitSelectMode();
                   Navigator.of(context).pop();
                 } else {
-                  ScaffoldMessenger.of(_scaffoldKey.currentContext).showSnackBar(SnackBar(content: Text('Name cannot be null!')));
+                  ScaffoldMessenger.of(_scaffoldKey.currentContext)
+                      .showSnackBar(
+                      SnackBar(content: Text('Name cannot be null!')));
                 }
               },
             )
@@ -806,24 +916,39 @@ class MoneyListState extends State<MoneyList>{
     );
   }
 
-  Widget _buildRow(i, context){
-    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _editDialog(context));
+  Widget _buildRow(i, context) {
+    var iconEdit = IconButton(
+        icon: Icon(
+          Icons.edit,
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        onPressed: () => _editDialog(context));
     // var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).colorScheme.secondary), onPressed: () => _notYetSnack(Scaffold.of(context)));
     var iconNoti = Container();
-    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _confirmDialog(context, 'Check'));
-    var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
-    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary), onPressed: () => _confirmDialog(context, 'Delete'));
+    var iconCheck = IconButton(
+        icon: Icon(
+          Icons.check_circle,
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        onPressed: () => _confirmDialog(context, 'Check'));
+    var iconUncheck = IconButton(
+        icon: Icon(Icons.check_circle_outline),
+        onPressed: () => _confirmDialog(context, 'Uncheck'));
+    var iconDelete = IconButton(
+        icon:
+        Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary),
+        onPressed: () => _confirmDialog(context, 'Delete'));
 
     var x = 'ERROR';
     var y = 'ERROR';
-    if(i < nums.length) {
+    if (i < nums.length) {
       x = nums.keys.elementAt(i);
     } else {
       y = ddates.keys.elementAt(i - nums.length);
     }
     return Center(
       child: GestureDetector(
-          onTap: (){
+          onTap: () {
             if (selectMode) {
               if (selected.contains(i < nums.length ? x : y)) {
                 selected.remove(i < nums.length ? x : y);
@@ -832,7 +957,7 @@ class MoneyListState extends State<MoneyList>{
               }
               var checked = false;
               var unchecked = false;
-              selected.forEach((e){
+              selected.forEach((e) {
                 if (ddates.containsKey(e)) {
                   checked = true;
                 } else if (nums.containsKey(e)) {
@@ -844,41 +969,68 @@ class MoneyListState extends State<MoneyList>{
                   _exitSelectMode();
                 } else if (selected.length == 1) {
                   appBarTitle = Text(selected[0]);
-                  appBarActions = [iconEdit, iconNoti, checked ? iconUncheck : iconCheck, iconDelete];
+                  appBarActions = [
+                    iconEdit,
+                    iconNoti,
+                    checked ? iconUncheck : iconCheck,
+                    iconDelete
+                  ];
                 } else {
                   appBarTitle = Text('${selected.length} items');
                   if (checked && unchecked) {
                     appBarActions = [iconDelete];
                   } else {
-                    appBarActions = [checked ? iconUncheck : iconCheck, iconDelete];
+                    appBarActions = [
+                      checked ? iconUncheck : iconCheck,
+                      iconDelete
+                    ];
                   }
                 }
               });
             } else {
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
                   builder: (context) {
                     todo = i < nums.length ? x : y;
                     return FullScreen();
                   },
-                  fullscreenDialog: true
-              )).then((_){setState((){});});
+                  fullscreenDialog: true))
+                  .then((_) {
+                setState(() {});
+              });
             }
           },
-          onLongPress: (){
+          onLongPress: () {
             setState(() {
               selectMode = true;
               selected = [i < nums.length ? x : y];
               appBarTitle = Text(i < nums.length ? x : y);
-              appBarActions = [iconEdit, iconNoti, nums.keys.contains(i < nums.length ? x : y) ? iconCheck : iconUncheck, iconDelete];
-              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
+              appBarActions = [
+                iconEdit,
+                iconNoti,
+                nums.keys.contains(i < nums.length ? x : y)
+                    ? iconCheck
+                    : iconUncheck,
+                iconDelete
+              ];
+              appBarLeading = IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  onPressed: _exitSelectMode);
             });
           },
           child: Card(
-              color: i < nums.length ? Theme.of(context).cardColor : Color(0x10000000),
+              color: i < nums.length
+                  ? Theme.of(context).cardColor
+                  : Color(0x10000000),
               elevation: 0,
               shape: RoundedRectangleBorder(
                 side: BorderSide(
-                  color: selected.contains(i < nums.length ? x : y) ? Color(0xe3000000) : Color(0x33000000),
+                  color: selected.contains(i < nums.length ? x : y)
+                      ? Color(0xe3000000)
+                      : Color(0x33000000),
                   width: selected.contains(i < nums.length ? x : y) ? 2.0 : 1.0,
                 ),
                 borderRadius: BorderRadius.circular(8.0),
@@ -895,44 +1047,71 @@ class MoneyListState extends State<MoneyList>{
                         children: <Widget>[
                           Flexible(
                               flex: 3,
-                              child: Text(i < nums.length ? x : y,
+                              child: Text(
+                                i < nums.length ? x : y,
                                 style: TextStyle(
                                   fontFamily: 'ProductSans',
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
 //                                    color: i < nums.length ? Color(0xDE000000) : Color(0x99000000),
-                                  color: i < nums.length ? Theme.of(context).textTheme.subtitle2.color : Theme.of(context).textTheme.caption.color,
-                                ),)
-                          ),
+                                  color: i < nums.length
+                                      ? Theme.of(context)
+                                      .textTheme
+                                      .subtitle2
+                                      .color
+                                      : Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      .color,
+                                ),
+                              )),
                           Flexible(
                             flex: 2,
                             child: Padding(
                                 padding: EdgeInsets.only(left: 16.0),
-                                child: Text(i < nums.length ? cf.format(nums[x], currency, compact: nums[x] >= 10, decimal: 2) : '',
+                                child: Text(
+                                  i < nums.length
+                                      ? cf.format(nums[x], currency,
+                                      compact: nums[x] >= 10, decimal: 2)
+                                      : '',
                                   textAlign: TextAlign.end,
                                   style: TextStyle(
-                                      color: '${nums[x]}'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).colorScheme.secondary,
+                                      color: '${nums[x]}'[0] == '-'
+                                          ? Theme.of(context).errorColor
+                                          : Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18.0
-                                  ),
-                                )
-                            ),
+                                      fontSize: 18.0),
+                                )),
                           )
                         ],
                       ),
                       Padding(
                           padding: EdgeInsets.only(top: 8.0),
-                          child: Text(i < nums.length ? dates[x] : ddates[y],
-                            style: TextStyle(color: Theme.of(context).textTheme.caption.color),
-                          )
-                      )
+                          child: Text(
+                            i < nums.length ? dates[x] : ddates[y],
+                            style: TextStyle(
+                                color:
+                                Theme.of(context).textTheme.caption.color),
+                          ))
                     ],
-                  )
-              )
-          )
-      ),
+                  )))),
     );
   }
+}
+
+
+int dateInsertIndex(List<String> lst, String date) {
+  DateTime _date = string2Date(date);
+
+  for (int i = 0; i < lst.length; i++) {
+    if (_date.compareTo(string2Date(lst[i].split('~|~')[3])) >= 0) {
+      return i;
+    }
+  }
+
+  return lst.length;
 }
 
 class MoneyList extends StatefulWidget {
@@ -940,14 +1119,14 @@ class MoneyList extends StatefulWidget {
   MoneyListState createState() => new MoneyListState();
 }
 
-
-
-class AddDialogState extends State<AddDialog>{
+class AddDialogState extends State<AddDialog> {
   var nameController = TextEditingController();
   var descriptionController = TextEditingController();
   var amountController = TextEditingController();
+  TextEditingController dateController = TextEditingController(text: date2String(DateTime.now()));
   bool validName = true;
   bool validAmount = true;
+  bool positive = true;
 
   @override
   Widget build(BuildContext context) {
@@ -956,53 +1135,59 @@ class AddDialogState extends State<AddDialog>{
           title: Text('Add Entry'),
           backgroundColor: Theme.of(context).bottomAppBarColor,
           systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarBrightness: Theme.of(context).brightness,
-              statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
+            statusBarColor: Colors.transparent,
+            statusBarBrightness: Theme.of(context).brightness,
+            statusBarIconBrightness:
+            Theme.of(context).brightness == Brightness.light
+                ? Brightness.dark
+                : Brightness.light,
           ),
-          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
+          iconTheme:
+          IconThemeData(color: Theme.of(context).colorScheme.secondary),
           actions: <Widget>[
-            Builder(
-                builder: (context) {
-                  return TextButton(
-                      child: Text('SAVE',
-                          style: Theme
-                              .of(context)
-                              .textTheme
-                              .subtitle2
-                              .copyWith(color: Theme.of(context).colorScheme.secondary)),
-                      onPressed: () {
-                        if (amountController.text.isNotEmpty &&
-                            nameController.text.isNotEmpty) {
-                          try {
-                            num amount = eval.eval(Expression.parse(amountController.text.replaceAll(currency.decimalSeparator, '.')), {});
-                            var date = DateTime.now();
-                            var sdate = '${date.day}/${date.month}/${date
-                                .year}';
-                            expr.insert(0,
-                                double.parse(amount.toStringAsFixed(2)).toString() + '~|~' +
-                                    nameController.text + '~|~' +
-                                    descriptionController.text + '~|~' +
-                                    sdate);
-                            updateData();
-                            Navigator.of(context).pop();
-                          } catch (e) {
-                            print(e);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid Money Input'),));
-                          }
-                        } else {
-                          var snackbar = SnackBar(
-                              content: Text('Name and ${currency.symbol} are required'));
-                          ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                        }
+            Builder(builder: (context) {
+              return TextButton(
+                  child: Text('SAVE',
+                      style: Theme.of(context).textTheme.subtitle2.copyWith(
+                          color: Theme.of(context).colorScheme.secondary)),
+                  onPressed: () {
+                    if (amountController.text.isNotEmpty &&
+                        nameController.text.isNotEmpty) {
+                      try {
+                        num amount = eval.eval(
+                            Expression.parse(amountController.text
+                                .replaceAll(currency.decimalSeparator, '.')),
+                            {})*(positive ? 1 : -1);
+                        expr.insert(
+                            dateInsertIndex(expr, dateController.text),
+                            double.parse(amount.toStringAsFixed(2)).toString() +
+                                '~|~' +
+                                nameController.text +
+                                '~|~' +
+                                descriptionController.text +
+                                '~|~' +
+                                dateController.text);
+                        updateData();
+                        Navigator.of(context).pop();
+                      } catch (e) {
+                        print(e);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Invalid money input'),
+                        ));
                       }
-                  );
-                }
-            )
+                    } else {
+                      var snackbar = SnackBar(
+                          content:
+                          Text('Name and ${currency.symbol} are required'));
+                      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                    }
+                  });
+            })
           ],
         ),
         body: Center(
-            child: Padding(
+            child: Container(
+                constraints: BoxConstraints(maxWidth: 740),
                 padding: EdgeInsets.all(8.0),
                 child: Card(
                     color: Theme.of(context).cardColor,
@@ -1018,91 +1203,132 @@ class AddDialogState extends State<AddDialog>{
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
+                            TextField(
+                              controller: nameController,
+                              autofocus: true,
+                              onChanged: (val) {
+                                setState(() {
+                                  if (val.isEmpty) {
+                                    validName = false;
+                                  } else {
+                                    validName = true;
+                                  }
+                                });
+                              },
+                              cursorColor: validName
+                                  ? Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  : Theme.of(context).errorColor,
+                              // decoration: InputDecoration(
+                              //   labelText: 'Name',
+                              //   border: OutlineInputBorder(),
+                              //   errorText: validName ? null : '',
+                              // ),
+                              decoration: filledInputDecoration('Name', context,
+                                  valid: validName
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter
+                                    .singleLineFormatter,
+                                LengthLimitingTextInputFormatter(25)
+                              ],
+                            ),
+                            const SizedBox(height: 8,),
                             Row(
                               children: <Widget>[
                                 Flexible(
-                                    flex: 3,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: validName ? 22 : 0),
-                                      child: TextField(
-                                        controller: nameController,
-                                        autofocus: true,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            if (val.isEmpty) {
-                                              validName = false;
-                                            } else {
-                                              validName = true;
-                                            }
-                                          });
-                                        },
-                                        cursorColor: validName ? Theme.of(context).colorScheme.secondary : Theme.of(context).errorColor,
-                                        decoration: InputDecoration(
-                                          labelText: 'Name',
-                                          border: OutlineInputBorder(),
-                                          errorText: validName ? null : '',
-                                        ),
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.singleLineFormatter,
-                                          LengthLimitingTextInputFormatter(25)
-                                        ],
-                                      ),
-                                    )
+                                  flex: 2,
+                                  child:
+                                  TextField(
+                                      controller: descriptionController,
+                                      maxLines: null,
+                                      decoration: filledInputDecoration('Description', context)
+                                  ),
                                 ),
                                 Flexible(
-                                  flex: 1,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(left: 16.0, bottom: validAmount ? 22 : 0),
-                                    child: TextField(
-                                      controller: amountController,
-                                      textAlign: TextAlign.center,
-                                      onChanged: (val) {
-                                        try {
-                                          val = val.replaceAll(currency.decimalSeparator, '.');
-                                          // print('\tVAL:\t$val');
-                                          // print('\tEVAL:\t${eval.eval(Expression.parse(val), {})}');
-                                          // print('\tTYPE:\t${eval.eval(Expression.parse(val), {}).runtimeType}');
-                                          // // print('\tPARSE:\t${double.parse(eval.eval(Expression.parse(val), {}))}');
-                                          // print('\n');
-                                          num amount = eval.eval(Expression.parse(val), {});
-                                          // double.parse(eval.eval(Expression.parse(val), {}));
-                                          setState(() {
-                                            validAmount =  amount != double.infinity && amount != null;
-                                          });
-                                        } catch(e) {
-                                          // print('\tERROR:\t$e');
-                                          setState(() {
-                                            validAmount = false;
-                                          });
-                                        }
-                                      },
-                                      // keyboardType: iOSWeb ? TextInputType.text : TextInputType.datetime,
-                                      cursorColor: validAmount ? Theme.of(context).colorScheme.secondary : Theme.of(context).errorColor,
-                                      decoration: InputDecoration(
-                                        labelText: currency.symbol,
-                                        border: OutlineInputBorder(),
-                                        errorText: validAmount ? null : '',
-                                      ),
-                                    ),
-                                  ),
-                                )
+                                    flex: 1,
+                                    child: Container(
+                                        margin: EdgeInsets.only(left: 16),
+                                        padding: EdgeInsets.only(right: 8),
+                                        decoration: BoxDecoration(
+                                            color: validAmount
+                                                ? bgColor(context)
+                                                : Theme.of(context).errorColor.withOpacity(.1),
+                                            borderRadius: BorderRadius.all(Radius.circular(6))),
+                                        child: Row(children: [
+                                          Container(
+                                            child: IconButton(
+                                              icon: Icon(positive ? Icons.add : Icons.remove),
+                                              iconSize: 16,
+                                              color: amountController.text.isNotEmpty
+                                                  ? validAmount
+                                                  ? Theme.of(context).colorScheme.secondary
+                                                  : Theme.of(context).errorColor
+                                                  : Theme.of(context).textTheme.caption.color,
+                                              padding: EdgeInsets.zero,
+                                              onPressed: () => setState(() => positive = !positive),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: TextField(
+                                                controller: amountController,
+                                                onChanged: (val) {
+                                                  try {
+                                                    if (val.trim() == '-') {
+                                                      positive = !positive;
+                                                      amountController.text = '';
+                                                      validAmount = true;
+                                                    } else {
+                                                      val = val.replaceAll(
+                                                          currency.decimalSeparator, '.');
+                                                      num amount = eval.eval(Expression.parse(val), {});
+                                                      validAmount =
+                                                          amount != double.infinity && amount != null;
+                                                      if (validAmount && amount < 0) {
+                                                        positive = !positive;
+                                                        amountController.text =
+                                                            amountController.text.replaceAll('-', '');
+                                                      }
+                                                    }
+                                                  } on Exception {
+                                                    validAmount = false;
+                                                  }
+                                                  setState(() {});
+                                                },
+                                                textAlign: TextAlign.left,
+                                                // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
+                                                keyboardType: TextInputType.numberWithOptions(
+                                                    signed: true, decimal: true),
+                                                cursorColor: validAmount
+                                                    ? Theme.of(context).colorScheme.secondary
+                                                    : Theme.of(context).errorColor,
+                                                decoration: filledInputDecoration(currency.symbol, context,
+                                                    valid: validAmount,
+                                                    // hintText:
+                                                    // currency.symbol + '                        ',
+                                                    filled: false)),
+                                          )
+                                        ])))
                               ],
-                            ),TextField(
-                              controller: descriptionController,
-                              maxLines: 1,
-                              maxLength: 35,
-                              decoration: InputDecoration(
-                                  labelText: 'Description',
-                                  border: OutlineInputBorder(),
-                              ),
                             ),
+                            const SizedBox(height: 8,),
+                            TextField(
+                              controller: dateController,
+                              onTap: () => showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.utc(1900),
+                                  lastDate: DateTime.now()
+                              ).then((value) => setState(() {
+                                dateController.text = date2String(value);
+                              })),
+                              readOnly: true,
+                              mouseCursor: SystemMouseCursors.click,
+                              decoration: filledInputDecoration('Date', context),
+                            )
                           ],
-                        )
-                    )
-                )
-            )
-        )
-    );
+                        ))))));
   }
 }
 
@@ -1119,79 +1345,129 @@ class _AddItemDialog extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _AddItemDialogState(name);
 }
-class _AddItemDialogState extends State{
+
+class _AddItemDialogState extends State {
   final String name;
 
-  var descriptionController = TextEditingController();
-  var amountController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController dateController = TextEditingController(text: date2String(DateTime.now()));
   bool validAmount = true;
+  bool positive = true;
 
   _AddItemDialogState(this.name);
   @override
   Widget build(BuildContext context) {
+    print(CurrencyFormatter().parse('-195K \$', CurrencyFormatter.usd));
     return AlertDialog(
-      title: Text('Add Entry',
-        style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500
-        ),
+      title: Text(
+        'Add Entry',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
-      content: Row(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
-                flex: 3,
-                child: Padding(
-                    padding: EdgeInsets.only(bottom: 22),
-                    child: TextField(
-                        controller: descriptionController,
-                        autofocus: true,
-                        decoration: InputDecoration(
-                            hintText: 'Description'
-                        )
-                    )
-                )
+            Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Flexible(
+                      flex: 2,
+                      child: TextField(
+                          controller: descriptionController,
+                          autofocus: true,
+                          maxLines: null,
+                          decoration: filledInputDecoration('Description', context))),
+                  Flexible(
+                      flex: 1,
+                      child: Container(
+                          margin: EdgeInsets.only(left: 16),
+                          padding: EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                              color: validAmount
+                                  ? bgColor(context)
+                                  : Theme.of(context).errorColor.withOpacity(.1),
+                              borderRadius: BorderRadius.all(Radius.circular(6))),
+                          child: Row(children: [
+                            Container(
+                              child: IconButton(
+                                icon: Icon(positive ? Icons.add : Icons.remove),
+                                iconSize: 16,
+                                color: amountController.text.isNotEmpty
+                                    ? validAmount
+                                    ? Theme.of(context).colorScheme.secondary
+                                    : Theme.of(context).errorColor
+                                    : Theme.of(context).textTheme.caption.color,
+                                padding: EdgeInsets.zero,
+                                onPressed: () => setState(() => positive = !positive),
+                              ),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                  controller: amountController,
+                                  onChanged: (val) {
+                                    try {
+                                      if (val.trim() == '-') {
+                                        positive = !positive;
+                                        amountController.text = '';
+                                        validAmount = true;
+                                      } else {
+                                        val = val.replaceAll(
+                                            currency.decimalSeparator, '.');
+                                        num amount = eval.eval(Expression.parse(val), {});
+                                        validAmount =
+                                            amount != double.infinity && amount != null;
+                                        if (validAmount && amount < 0) {
+                                          positive = !positive;
+                                          amountController.text =
+                                              amountController.text.replaceAll('-', '');
+                                        }
+                                      }
+                                    } on Exception {
+                                      validAmount = false;
+                                    }
+                                    setState(() {});
+                                  },
+                                  textAlign: TextAlign.left,
+                                  // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                      signed: true, decimal: true),
+                                  cursorColor: validAmount
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).errorColor,
+                                  decoration: filledInputDecoration(currency.symbol, context,
+                                      valid: validAmount,
+                                      hintText: ' '*30,
+                                      filled: false)),
+                            )
+                          ])
+                      )
+                  )
+                ]
             ),
-            Flexible(
-                flex: 1,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 16, bottom: validAmount ? 22 : 0),
-                  child: TextField(
-                    controller: amountController,
-                    onChanged: (val) {
-                      try {
-                        val = val.replaceAll(currency.decimalSeparator, '.');
-                        num amount = eval.eval(Expression.parse(val), {});
-                        setState(() {
-                          validAmount = amount != double.infinity && amount != null;
-                        });
-                      } on Exception {
-                        setState(() {
-                          validAmount = false;
-                        });
-                      }
-                    },
-                    textAlign: TextAlign.center,
-                    // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
-                    cursorColor: validAmount ? Theme
-                        .of(context)
-                        .colorScheme.secondary : Theme
-                        .of(context)
-                        .errorColor,
-                    decoration: InputDecoration(
-                      hintText: currency.symbol,
-                      errorText: validAmount ? null : '',
-                    ),
-                  ),
-                )
+            const SizedBox(height: 8,),
+            TextField(
+              controller: dateController,
+              onTap: () => showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.utc(1900),
+                  lastDate: DateTime.now()
+              ).then((value) => setState(() {
+                dateController.text = date2String(value);
+              })),
+              readOnly: true,
+              mouseCursor: SystemMouseCursors.click,
+              decoration: filledInputDecoration('Date', context),
             )
           ]
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('CANCEL',
+          child: Text(
+            'CANCEL',
             style: TextStyle(color: Theme.of(context).colorScheme.secondary),
           ),
-          onPressed: ()=> Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
           child: Text('ADD'),
@@ -1199,31 +1475,38 @@ class _AddItemDialogState extends State{
             primary: Theme.of(context).colorScheme.secondary,
             onSurface: Theme.of(context).colorScheme.secondary,
           ),
-          onPressed: validAmount && amountController.text.isNotEmpty ? () {
-            num amount = eval.eval(Expression.parse(amountController.text.replaceAll(currency.decimalSeparator, '.')), {});
-            var date = DateTime.now();
-            var sdate = '${date.day}/${date.month}/${date.year}';
-            expr.insert(0,
-                double.parse(amount.toStringAsFixed(2)).toString() + '~|~' +
-                    name + '~|~' +
-                    descriptionController.text + '~|~' +
-                    sdate);
+          onPressed: validAmount && amountController.text.isNotEmpty
+              ? () {
+            num amount = eval.eval(
+                Expression.parse(amountController.text
+                    .replaceAll(currency.decimalSeparator, '.')),
+                {}) *
+                (positive ? 1 : -1);
+            expr.insert(
+                dateInsertIndex(expr, dateController.text),
+                double.parse(amount.toStringAsFixed(2)).toString() +
+                    '~|~' +
+                    name +
+                    '~|~' +
+                    descriptionController.text +
+                    '~|~' +
+                    dateController.text);
             updateData();
             Navigator.of(context).pop();
-          } : null,
+          }
+              : null,
         )
       ],
     );
   }
 }
 
-enum Action{restore, delete, reminder, repeat}
+enum Action { restore, delete, reminder, repeat }
 
-class FullScreenState extends State<FullScreen>{
-
+class FullScreenState extends State<FullScreen> {
   updateData() async {
     var prefs = await SharedPreferences.getInstance();
-    setState((){
+    setState(() {
       prefs.setStringList('expr', expr);
       prefs.setStringList('dexpr', dexpr);
     });
@@ -1305,23 +1588,29 @@ class FullScreenState extends State<FullScreen>{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('$action confirmation'),
-            content: Text('Are you sure you want to ${action.toLowerCase()} the selected entries?'),
+            content: Text(
+                'Are you sure you want to ${action.toLowerCase()} the selected entries?'),
             actions: <Widget>[
               TextButton(
-                child: Text('CANCEL',
-                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                child: Text(
+                  'CANCEL',
+                  style:
+                  TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               TextButton(
-                child: Text('ACCEPT',
-                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                child: Text(
+                  'ACCEPT',
+                  style:
+                  TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onPressed: () {
                   var tot = expr + dexpr;
-                  selected.forEach((f){
-                    var prexpr = tot.where((e) => e.split('~|~')[1] == todo).toList()[f];
-                    switch(action) {
+                  selected.forEach((f) {
+                    var prexpr =
+                    tot.where((e) => e.split('~|~')[1] == todo).toList()[f];
+                    switch (action) {
                       case 'Check':
                         dexpr.add(prexpr);
                         expr.remove(prexpr);
@@ -1333,8 +1622,11 @@ class FullScreenState extends State<FullScreen>{
                         break;
 
                       case 'Delete':
-                        if (expr.contains(prexpr)) {expr.remove(prexpr);}
-                        else {dexpr.remove(prexpr);}
+                        if (expr.contains(prexpr)) {
+                          expr.remove(prexpr);
+                        } else {
+                          dexpr.remove(prexpr);
+                        }
                         break;
 
                       default:
@@ -1348,40 +1640,44 @@ class FullScreenState extends State<FullScreen>{
               )
             ],
           );
-        }
-    );
+        });
   }
 
-  _editDialog(context){
+  _editDialog(context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         var controller = TextEditingController();
         var tothere = here + dhere;
-        controller.text =  tothere[selected[0]][2];
+        controller.text = tothere[selected[0]][2];
         return AlertDialog(
-          title: Text('Edit Item'),
+          title: Text('Edit Description'),
           content: TextField(
             controller: controller,
             autofocus: true,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(35)
-            ],
+            maxLines: null,
+            decoration: filledInputDecoration(null, context),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('CANCEL',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              child: Text(
+                'CANCEL',
+                style:
+                TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text('CHANGE',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+              child: Text(
+                'CHANGE',
+                style:
+                TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: () {
                 var tot = expr + dexpr;
-                var prexpr = tot.where((e) => e.split('~|~')[1] == todo).toList()[selected[0]];
+                var prexpr = tot
+                    .where((e) => e.split('~|~')[1] == todo)
+                    .toList()[selected[0]];
                 var split = prexpr.split("~|~");
                 split[2] = controller.text;
                 if (selected[0] < here.length) {
@@ -1415,18 +1711,33 @@ class FullScreenState extends State<FullScreen>{
 
   @override
   Widget build(BuildContext context) {
-    var iconEdit = IconButton(icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _editDialog(context));
+    var iconEdit = IconButton(
+        icon: Icon(
+          Icons.edit,
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        onPressed: () => _editDialog(context));
     //var iconNoti = IconButton(icon: Icon(Icons.notifications, color: Theme.of(context).colorScheme.secondary), onPressed: () => _notYetSnack(Scaffold.of(context)));
     var iconNoti = Container();
-    var iconCheck = IconButton(icon: Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary,), onPressed: () => _confirmDialog(context, 'Check'));
-    var iconUncheck = IconButton(icon: Icon(Icons.check_circle_outline), onPressed: () => _confirmDialog(context, 'Uncheck'));
-    var iconDelete = IconButton(icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary), onPressed: () => _confirmDialog(context, 'Delete'));
+    var iconCheck = IconButton(
+        icon: Icon(
+          Icons.check_circle,
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+        onPressed: () => _confirmDialog(context, 'Check'));
+    var iconUncheck = IconButton(
+        icon: Icon(Icons.check_circle_outline),
+        onPressed: () => _confirmDialog(context, 'Uncheck'));
+    var iconDelete = IconButton(
+        icon:
+        Icon(Icons.delete, color: Theme.of(context).colorScheme.secondary),
+        onPressed: () => _confirmDialog(context, 'Delete'));
     here = [];
     dhere = [];
     total = 0;
-    expr.forEach((f){
+    expr.forEach((f) {
       var e = f.split('~|~');
-      if(e[1] == todo){
+      if (e[1] == todo) {
         here.add(e);
         total += double.parse(e[0]);
       }
@@ -1436,294 +1747,353 @@ class FullScreenState extends State<FullScreen>{
       total = total.round();
     }
 
-    dexpr.forEach((f){
+    dexpr.forEach((f) {
       var e = f.split('~|~');
-      if(e[1] == todo){
+      if (e[1] == todo) {
         dhere.add(e);
       }
     });
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: appBarTitle,
-          backgroundColor: Theme.of(context).bottomAppBarColor,
-          systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarBrightness: Theme.of(context).brightness,
-              statusBarIconBrightness: Theme.of(context).brightness == Brightness.light ? Brightness.dark : Brightness.light,
-          ),
-          actions: appBarActions,
-          iconTheme: IconThemeData(color: Theme.of(context).colorScheme.secondary),
-          leading: appBarLeading,
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: appBarTitle,
+        backgroundColor: Theme.of(context).bottomAppBarColor,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarBrightness: Theme.of(context).brightness,
+          statusBarIconBrightness:
+          Theme.of(context).brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light,
         ),
-        body: Stack(
-            children: [
-              ListView.builder(
-                itemCount: here.length + dhere.length + 1,
-                itemBuilder: (context, j){
-                  if (j == 0){
-                    return Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text('Total:', style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'ProductSans'
-                            ),),
-                            Text(cf.format(total, currency), style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                color: '$total'[0] == '-' ? Theme.of(context).errorColor : Theme.of(context).colorScheme.secondary
-                            ),)
-                          ],
-                        ));
-                  } else if(j <= here.length) {
-                    var i = j-1;
-                    var key = here[i].join('~|~');
-                    return Dismissible(
-                        key: Key(key),
-                        onDismissed: (direction){
+        actions: appBarActions,
+        iconTheme:
+        IconThemeData(color: Theme.of(context).colorScheme.secondary),
+        leading: appBarLeading,
+      ),
+      body: Stack(children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: ListView.builder(
+            itemCount: here.length + dhere.length + 1,
+            itemBuilder: (context, j) {
+              if (j == 0) {
+                return Padding(
+                    padding: EdgeInsets.fromLTRB(10, 24, 10, 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Total:',
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'ProductSans'),
+                        ),
+                        Text(
+                          cf.format(total, currency),
+                          style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: '$total'[0] == '-'
+                                  ? Theme.of(context).errorColor
+                                  : Theme.of(context).colorScheme.secondary),
+                        )
+                      ],
+                    ));
+              } else if (j <= here.length) {
+                var i = j - 1;
+                var key = here[i].join('~|~');
+                return Dismissible(
+                    key: Key(key),
+                    onDismissed: (direction) {
+                      setState(() {
+                        expr.remove(key);
+                        dexpr.insert(0, key);
+                        updateData();
+                      });
+                    },
+                    child: GestureDetector(
+                        onTap: () {
+                          if (selectMode) {
+                            if (selected.contains(i)) {
+                              selected.remove(i);
+                            } else {
+                              selected.add(i);
+                            }
+                            var checked = false;
+                            var unchecked = false;
+                            selected.forEach((e) {
+                              if (e < here.length) {
+                                unchecked = true;
+                              } else {
+                                checked = true;
+                              }
+                            });
+                            setState(() {
+                              if (selected.length == 0) {
+                                _exitSelectMode();
+                              } else if (selected.length == 1) {
+                                appBarTitle = Text('1 item');
+                                appBarActions = [
+                                  iconEdit,
+                                  iconNoti,
+                                  checked ? iconUncheck : iconCheck,
+                                  iconDelete
+                                ];
+                              } else {
+                                appBarTitle = Text('${selected.length} items');
+                                if (checked && unchecked) {
+                                  appBarActions = [iconDelete];
+                                } else {
+                                  appBarActions = [
+                                    checked ? iconUncheck : iconCheck,
+                                    iconDelete
+                                  ];
+                                }
+                              }
+                            });
+                          }
+                        },
+                        onLongPress: () {
                           setState(() {
-                            expr.remove(key);
-                            dexpr.insert(0,key);
-                            updateData();
+                            selectMode = true;
+                            selected = [i];
+                            appBarTitle = Text('1 item');
+                            appBarActions = [
+                              iconEdit,
+                              iconNoti,
+                              iconCheck,
+                              iconDelete
+                            ];
+                            appBarLeading = IconButton(
+                                icon: Icon(
+                                  Icons.arrow_back,
+                                  color:
+                                  Theme.of(context).colorScheme.secondary,
+                                ),
+                                onPressed: _exitSelectMode);
                           });
                         },
-                        child: GestureDetector(
-                            onTap: (){
-                              if (selectMode) {
-                                if (selected.contains(i)) {
-                                  selected.remove(i);
-                                } else {
-                                  selected.add(i);
-                                }
-                                var checked = false;
-                                var unchecked = false;
-                                selected.forEach((e){
-                                  if (e < here.length) {
-                                    unchecked = true;
-                                  } else {
-                                    checked = true;
-                                  }
-                                });
-                                setState(() {
-                                  if (selected.length == 0) {
-                                    _exitSelectMode();
-                                  } else if (selected.length == 1) {
-                                    appBarTitle = Text('1 item');
-                                    appBarActions = [iconEdit, iconNoti, checked ? iconUncheck : iconCheck, iconDelete];
-                                  } else {
-                                    appBarTitle = Text('${selected.length} items');
-                                    if (checked && unchecked) {
-                                      appBarActions = [iconDelete];
-                                    } else {
-                                      appBarActions = [checked ? iconUncheck : iconCheck, iconDelete];
-                                    }
-                                  }
-                                });
-                              }
-                            },
-                            onLongPress: (){
-                              setState(() {
-                                selectMode = true;
-                                selected = [i];
-                                appBarTitle = Text('1 item');
-                                appBarActions = [iconEdit, iconNoti, iconCheck, iconDelete];
-                                appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
-                              });
-                            },
-                            child: Card(
-                                color: Theme.of(context).cardColor,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    color: selected.contains(i) ? Color(0xe3000000) : Color(0x33000000),
-                                    width: selected.contains(i) ? 2.0 : 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Card(
+                            color: Theme.of(context).cardColor,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: selected.contains(i)
+                                    ? Color(0xe3000000)
+                                    : Color(0x33000000),
+                                width: selected.contains(i) ? 2.0 : 1.0,
+                              ),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
-                                        Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .spaceBetween,
-                                          children: <Widget>[
-                                            Flexible(
-                                                flex: 3,
-                                                child: Text(here[i][2],
-                                                  style: TextStyle(
-                                                    fontSize: 16.0,
-                                                  ),)
-                                            ),
-                                            Flexible(
-                                              flex: 2,
-                                              child: Padding(
-                                                  padding: EdgeInsets.only(
-                                                      left: 16.0),
-                                                  child: Text(cf.format(here[i][0], currency),
-                                                    textAlign: TextAlign.end,
-                                                    style: TextStyle(
-                                                        color: here[i][0][0] == '-'
-                                                            ? Theme.of(context).errorColor
-                                                            : Theme.of(context).colorScheme.secondary,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 18.0
-                                                    ),
-                                                  )
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        Padding(
-                                            padding: EdgeInsets.only(top: 8.0),
-                                            child: Text(here[i][3],
+                                        Flexible(
+                                            flex: 3,
+                                            child: Text(
+                                              here[i][2],
                                               style: TextStyle(
-                                                  color: Theme.of(context).textTheme.caption.color),
-                                            )
+                                                fontSize: 16.0,
+                                              ),
+                                            )),
+                                        Flexible(
+                                          flex: 2,
+                                          child: Padding(
+                                              padding:
+                                              EdgeInsets.only(left: 16.0),
+                                              child: Text(
+                                                cf.format(here[i][0], currency),
+                                                textAlign: TextAlign.end,
+                                                style: TextStyle(
+                                                    color: here[i][0][0] == '-'
+                                                        ? Theme.of(context)
+                                                        .errorColor
+                                                        : Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18.0),
+                                              )),
                                         )
                                       ],
-                                    )
-                                )
-                            )
-                        )
-                    );
-                  } else {
-                    try {
-                      var i = j - here.length - 1;
-                      var k = j-1;
-                      return GestureDetector(
-                          onTap: (){
-                            if (selectMode) {
-                              if (selected.contains(k)) {
-                                selected.remove(k);
-                              } else {
-                                selected.add(k);
-                              }
-                              var checked = false;
-                              var unchecked = false;
-                              selected.forEach((e){
-                                if (e < here.length) {
-                                  unchecked = true;
-                                } else {
-                                  checked = true;
-                                }
-                              });
-                              setState(() {
-                                if (selected.length == 0) {
-                                  _exitSelectMode();
-                                } else if (selected.length == 1) {
-                                  appBarTitle = Text('1 item');
-                                  appBarActions = [iconEdit, iconNoti, checked ? iconUncheck : iconCheck, iconDelete];
-                                } else {
-                                  appBarTitle = Text('${selected.length} items');
-                                  if (checked && unchecked) {
-                                    appBarActions = [iconDelete];
-                                  } else {
-                                    appBarActions = [checked ? iconUncheck : iconCheck, iconDelete];
-                                  }
-                                }
-                              });
+                                    ),
+                                    Padding(
+                                        padding: EdgeInsets.only(top: 8.0),
+                                        child: Text(
+                                          here[i][3],
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .caption
+                                                  .color),
+                                        ))
+                                  ],
+                                )))));
+              } else {
+                try {
+                  var i = j - here.length - 1;
+                  var k = j - 1;
+                  return GestureDetector(
+                      onTap: () {
+                        if (selectMode) {
+                          if (selected.contains(k)) {
+                            selected.remove(k);
+                          } else {
+                            selected.add(k);
+                          }
+                          var checked = false;
+                          var unchecked = false;
+                          selected.forEach((e) {
+                            if (e < here.length) {
+                              unchecked = true;
+                            } else {
+                              checked = true;
                             }
-                          },
-                          onLongPress: (){
-                            setState(() {
-                              selectMode = true;
-                              selected = [k];
+                          });
+                          setState(() {
+                            if (selected.length == 0) {
+                              _exitSelectMode();
+                            } else if (selected.length == 1) {
                               appBarTitle = Text('1 item');
-                              appBarActions = [iconEdit, iconNoti, iconUncheck, iconDelete];
-                              appBarLeading = IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.secondary,), onPressed: _exitSelectMode);
-                            });
-                          },
-                          child: Card(
-                              color: Color(0x05000000),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: selected.contains(k) ? Color(0xe3000000) : Color(0x33000000),
-                                  width: selected.contains(k) ? 2.0 : 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
+                              appBarActions = [
+                                iconEdit,
+                                iconNoti,
+                                checked ? iconUncheck : iconCheck,
+                                iconDelete
+                              ];
+                            } else {
+                              appBarTitle = Text('${selected.length} items');
+                              if (checked && unchecked) {
+                                appBarActions = [iconDelete];
+                              } else {
+                                appBarActions = [
+                                  checked ? iconUncheck : iconCheck,
+                                  iconDelete
+                                ];
+                              }
+                            }
+                          });
+                        }
+                      },
+                      onLongPress: () {
+                        setState(() {
+                          selectMode = true;
+                          selected = [k];
+                          appBarTitle = Text('1 item');
+                          appBarActions = [
+                            iconEdit,
+                            iconNoti,
+                            iconUncheck,
+                            iconDelete
+                          ];
+                          appBarLeading = IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Theme.of(context).colorScheme.secondary,
                               ),
-                              child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                              onPressed: _exitSelectMode);
+                        });
+                      },
+                      child: Card(
+                          color: Color(0x05000000),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              color: selected.contains(k)
+                                  ? Color(0xe3000000)
+                                  : Color(0x33000000),
+                              width: selected.contains(k) ? 2.0 : 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .spaceBetween,
-                                        children: <Widget>[
-                                          Flexible(
-                                              flex: 3,
-                                              child: Text(dhere[i][2],
-                                                style: TextStyle(
-                                                    fontSize: 16.0,
-                                                    color: Theme.of(context).textTheme.caption.color
-                                                ),)
-                                          ),
-                                          Flexible(
-                                            flex: 2,
-                                            child: Padding(
-                                                padding: EdgeInsets.only(
-                                                    left: 16.0),
-                                                child: Text(cf.format(dhere[i][0], currency),
-                                                  textAlign: TextAlign.end,
-                                                  style: TextStyle(
-                                                      color: Theme.of(context).textTheme.caption.color,
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 18.0
-                                                  ),
-                                                )
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      Padding(
-                                          padding: EdgeInsets.only(top: 8.0),
-                                          child: Text(dhere[i][3],
+                                      Flexible(
+                                          flex: 3,
+                                          child: Text(
+                                            dhere[i][2],
                                             style: TextStyle(
-                                                color:Theme.of(context).textTheme.caption.color),
-                                          )
+                                                fontSize: 16.0,
+                                                color: Theme.of(context)
+                                                    .textTheme
+                                                    .caption
+                                                    .color),
+                                          )),
+                                      Flexible(
+                                        flex: 2,
+                                        child: Padding(
+                                            padding:
+                                            EdgeInsets.only(left: 16.0),
+                                            child: Text(
+                                              cf.format(dhere[i][0], currency),
+                                              textAlign: TextAlign.end,
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .textTheme
+                                                      .caption
+                                                      .color,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0),
+                                            )),
                                       )
                                     ],
-                                  )
-                              )
-                          )
-                      );
-                    } on Exception catch(e){
-                      print('Exception: $e');
-                    }
-                  }
-                  return Container(); //TODO: aixo sobra
-                },
-              ),
-              Align(
-                  alignment: Alignment.bottomRight,
-                  child:  Padding(
-                      padding: activeBanner ?
-                      EdgeInsets.fromLTRB(0, 0, 16, 76)
-                          :
-                      EdgeInsets.all(16),
-                      child: FloatingActionButton(
-                        onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => _AddItemDialog(todo)
-                        ).then((_) {setState(() {});}),
-                        child: Icon(Icons.add),
-                      )
-                  )
-              )
-            ]
-        )
+                                  ),
+                                  Padding(
+                                      padding: EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        dhere[i][3],
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .caption
+                                                .color),
+                                      ))
+                                ],
+                              ))));
+                } on Exception catch (e) {
+                  print('Exception: $e');
+                }
+              }
+              return Container(); //TODO: aixo sobra
+            },
+          ),
+        ),
+        Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+                padding: activeBanner
+                    ? EdgeInsets.fromLTRB(0, 0, 16, 76)
+                    : EdgeInsets.all(16),
+                child: FloatingActionButton(
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => _AddItemDialog(todo)).then((_) {
+                    setState(() {});
+                  }),
+                  backgroundColor: Theme.of(context).cardColor,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  child: Icon(Icons.add),
+                )))
+      ]),
     );
   }
 }
@@ -1732,7 +2102,6 @@ class FullScreen extends StatefulWidget {
   @override
   createState() => FullScreenState();
 }
-
 
 notificationDialog(context, d) async {
   TimeOfDay time = await showTimePicker(
@@ -1745,14 +2114,15 @@ notificationDialog(context, d) async {
     var dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
     await flnp.schedule(
         0,
-        int.parse(d[0]) > 0 ? 'Get you money back!' : 'You have to give some money back!',
-        int.parse(d[0]) > 0 ?
-        '${d[1]} owes you ${d[0]}${currency.symbol}'
-            :
-        'You owe ${d[1]} ${d[0].slice(1)}${currency.symbol}',
+        int.parse(d[0]) > 0
+            ? 'Get you money back!'
+            : 'You have to give some money back!',
+        int.parse(d[0]) > 0
+            ? '${d[1]} owes you ${d[0]}${currency.symbol}'
+            : 'You owe ${d[1]} ${d[0].slice(1)}${currency.symbol}',
         dt,
-        notiDetails
-    );
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Reminder set!')));
+        notiDetails);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Reminder set!')));
   }
 }
