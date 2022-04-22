@@ -3,6 +3,7 @@ import 'package:currency_formatter/currency_formatter.dart';
 import 'package:debt/tools.dart';
 import 'package:expressions/expressions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,6 +49,8 @@ List<String> themes = ['light', 'dark', 'system'];
 
 BannerAd banner;
 bool activeBanner = false;
+
+bool calc = false;
 
 class AboutTile {
   IconData leading;
@@ -348,6 +351,7 @@ class MoneyListState extends State<MoneyList> {
       dexpr = (prefs.getStringList('dexpr') ?? []);
       theme.value = prefs.getString('theme') ?? 'system';
       showAds = prefs.getBool('showAds') ?? true;
+      calc = prefs.getBool('calc') ?? false;
     });
     return true;
   }
@@ -385,26 +389,24 @@ class MoneyListState extends State<MoneyList> {
               });
             }),
         PopupMenuButton(
-          itemBuilder: (context) => kIsWeb
-              ? [
-            PopupMenuItem(value: 1, child: Text('Set Theme')),
-            PopupMenuItem(value: 2, child: Text('Set Currency')),
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'theme', child: Text('Set Theme')),
+            PopupMenuItem(value: 'currency', child: Text('Set Currency')),
+            PopupMenuItem(value: 'calc', child: Text('Calculator Input')),
           ]
-              : [
-            PopupMenuItem(value: 1, child: Text('Set Theme')),
-            PopupMenuItem(value: 2, child: Text('Set Currency')),
-            PopupMenuItem(
-              value: 3,
-              child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
-            ),
-            PopupMenuItem(
-              value: 4,
-              child: Text('About'),
-            )
-          ],
+              + (kIsWeb ? [] : [
+                PopupMenuItem(
+                  value: 'ads',
+                  child: Text(showAds ? 'Hide Ads (Free)' : 'Show Ads'),
+                ),
+                PopupMenuItem(
+                  value: 'about',
+                  child: Text('About'),
+                )
+              ]),
           onSelected: (value) {
             switch (value) {
-              case 1:
+              case 'theme':
                 String option = theme.value;
                 showDialog(
                     context: context,
@@ -461,7 +463,7 @@ class MoneyListState extends State<MoneyList> {
                       );
                     });
                 break;
-              case 2:
+              case 'currency':
                 CurrencyFormatterSettings option =
                 localCurrency ? null : currency;
                 bool customCurrency = false;
@@ -616,7 +618,62 @@ class MoneyListState extends State<MoneyList> {
                       );
                     }).then((_) => setState(() {}));
                 break;
-              case 3:
+              case 'calc':
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      insetPadding: EdgeInsets.symmetric(horizontal: 16),
+                      title: Text('Calculator input'),
+                      content: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(''
+                                'If calculator input is disabled, a numerical keyboard will show when filling in money fields.\n\n'
+                                'If it is enabled, a full keyboard will be show so you can enter expressions like +, -, * and /.\n'
+                                'e.g. \'11.34/5\' will be saved as \'2.27\'.',
+                              textAlign: TextAlign.justify,
+                            ),
+                            const SizedBox(height: 24),
+                            InkWell(
+                                onTap: () => setState(() => calc = !calc),
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                                      color: bgColor(context),
+                                    ),
+                                    padding: EdgeInsets.only(left: 24, right: 16),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text('Calculator input'),
+                                        const SizedBox(width: 8,),
+                                        Switch(
+                                          value: calc,
+                                          activeColor: Theme.of(context).colorScheme.secondary,
+                                          onChanged: (val) => setState(() => calc = val),
+                                        )
+                                      ],
+                                    )
+                                )
+                            )
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: Text('CLOSE'),
+                          onPressed: () => Navigator.pop(context),
+                        )
+                      ],
+                    )
+                ).then((_) async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setBool('calc', calc);
+                });
+                break;
+              case 'ads':
                 if (showAds) {
                   showDialog(
                       context: context,
@@ -679,7 +736,7 @@ class MoneyListState extends State<MoneyList> {
                   updateData();
                 }
                 break;
-              case 4:
+              case 'about':
                 showModalBottomSheet(
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
@@ -1249,7 +1306,7 @@ class AddDialogState extends State<AddDialog> {
                                 Flexible(
                                     flex: 1,
                                     child: Container(
-                                        margin: EdgeInsets.only(left: 16),
+                                        margin: EdgeInsets.only(left: 8),
                                         padding: EdgeInsets.only(right: 8),
                                         decoration: BoxDecoration(
                                             color: validAmount
@@ -1298,7 +1355,9 @@ class AddDialogState extends State<AddDialog> {
                                                 },
                                                 textAlign: TextAlign.left,
                                                 // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
-                                                keyboardType: TextInputType.numberWithOptions(
+                                                keyboardType: calc
+                                                    ? null
+                                                    : TextInputType.numberWithOptions(
                                                     signed: true, decimal: true),
                                                 cursorColor: validAmount
                                                     ? Theme.of(context).colorScheme.secondary
@@ -1360,12 +1419,13 @@ class _AddItemDialogState extends State {
   Widget build(BuildContext context) {
     print(CurrencyFormatter().parse('-195K \$', CurrencyFormatter.usd));
     return AlertDialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 16),
       title: Text(
         'Add Entry',
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
       ),
       content: Column(
-        mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
                 mainAxisSize: MainAxisSize.max,
@@ -1380,7 +1440,7 @@ class _AddItemDialogState extends State {
                   Flexible(
                       flex: 1,
                       child: Container(
-                          margin: EdgeInsets.only(left: 16),
+                          margin: EdgeInsets.only(left: 8),
                           padding: EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                               color: validAmount
@@ -1429,7 +1489,9 @@ class _AddItemDialogState extends State {
                                   },
                                   textAlign: TextAlign.left,
                                   // keyboardType: iOSWeb ? TextInputType.text : TextInputType.numberWithOptions(signed: true, decimal: true),
-                                  keyboardType: TextInputType.numberWithOptions(
+                                  keyboardType: calc
+                                      ? null
+                                      : TextInputType.numberWithOptions(
                                       signed: true, decimal: true),
                                   cursorColor: validAmount
                                       ? Theme.of(context).colorScheme.secondary
@@ -1651,6 +1713,7 @@ class FullScreenState extends State<FullScreen> {
         var tothere = here + dhere;
         controller.text = tothere[selected[0]][2];
         return AlertDialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 16),
           title: Text('Edit Description'),
           content: TextField(
             controller: controller,
