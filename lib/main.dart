@@ -109,7 +109,7 @@ ThemeData lightTheme = ThemeData(
       headline3: safariStyle(),
       headline4: safariStyle(),
       headline5: safariStyle(),
-      headline6: safariStyle(),
+      headline6: safariStyle(fontWeight: FontWeight.w500),
       subtitle1: safariStyle(),
       subtitle2: safariStyle(),
       bodyText1: safariStyle(fontWeight: FontWeight.w500),
@@ -136,10 +136,23 @@ ThemeData darkTheme = ThemeData(
     // primaryColor: Color(0xff404040),
     // cardColor:  Color(0xff404040),
     primaryTextTheme: TextTheme(
-        headline6: TextStyle(
+        headline1: safariStyle(),
+        headline2: safariStyle(),
+        headline3: safariStyle(),
+        headline4: safariStyle(),
+        headline5: safariStyle(),
+        headline6: safariStyle(
             color: Colors.green[200],
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w500)),
+            fontWeight: FontWeight.w500
+        ),
+        subtitle1: safariStyle(),
+        subtitle2: safariStyle(),
+        bodyText1: safariStyle(),
+        bodyText2: safariStyle(),
+        caption: safariStyle(),
+        button: safariStyle(),
+        overline: safariStyle()
+    ),
     appBarTheme: AppBarTheme(
       titleTextStyle: TextStyle(
           color: Colors.green[200],
@@ -148,10 +161,19 @@ ThemeData darkTheme = ThemeData(
           fontWeight: FontWeight.w500),
     ),
     textTheme: TextTheme(
-        bodyText2: TextStyle(fontFamily: 'Roboto'),
-        bodyText1: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-        button: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500),
-        headline6: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.w500)
+        headline1: safariStyle(),
+        headline2: safariStyle(),
+        headline3: safariStyle(),
+        headline4: safariStyle(),
+        headline5: safariStyle(),
+        headline6: safariStyle(fontWeight: FontWeight.w500),
+        subtitle1: safariStyle(),
+        subtitle2: safariStyle(),
+        bodyText1: safariStyle(fontWeight: FontWeight.w500),
+        bodyText2: safariStyle(),
+        caption: safariStyle(),
+        button: safariStyle(fontWeight: FontWeight.w500),
+        overline: safariStyle()
     ),
     primaryIconTheme: IconThemeData(color: Colors.green[200]),
     textSelectionTheme: TextSelectionThemeData(
@@ -632,11 +654,17 @@ class MoneyListState extends State<MoneyList> {
                                 'If calculator input is disabled, a numerical keyboard will show when filling in money fields.\n\n'
                                 'If it is enabled, a full keyboard will be show so you can enter expressions like +, -, * and /.\n'
                                 'e.g. \'11.34/5\' will be saved as \'2.27\'.',
-                              textAlign: TextAlign.justify,
+                              textAlign: iOSWeb
+                                  ? TextAlign.left
+                                  : TextAlign.justify,
                             ),
                             const SizedBox(height: 24),
                             InkWell(
                                 onTap: () => setState(() => calc = !calc),
+                                hoverColor: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.transparent
+                                    : null,
+                                borderRadius: BorderRadius.all(Radius.circular(6)),
                                 child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.all(Radius.circular(6)),
@@ -922,7 +950,7 @@ class MoneyListState extends State<MoneyList> {
           title: Text('Edit Name'),
           content: TextField(
             controller: controller,
-            autofocus: true,
+            autofocus: iOSWeb ? false : true,
             inputFormatters: [LengthLimitingTextInputFormatter(25)],
             decoration: filledInputDecoration(null, context),
           ),
@@ -1262,7 +1290,7 @@ class AddDialogState extends State<AddDialog> {
                           children: <Widget>[
                             TextField(
                               controller: nameController,
-                              autofocus: true,
+                              autofocus: iOSWeb ? false : true,
                               onChanged: (val) {
                                 setState(() {
                                   if (val.isEmpty) {
@@ -1434,7 +1462,7 @@ class _AddItemDialogState extends State {
                       flex: 2,
                       child: TextField(
                           controller: descriptionController,
-                          autofocus: true,
+                          autofocus: iOSWeb ? false : true,
                           maxLines: null,
                           decoration: filledInputDecoration('Description', context))),
                   Flexible(
@@ -1717,7 +1745,7 @@ class FullScreenState extends State<FullScreen> {
           title: Text('Edit Description'),
           content: TextField(
             controller: controller,
-            autofocus: true,
+            autofocus: iOSWeb ? false : true,
             maxLines: null,
             decoration: filledInputDecoration(null, context),
           ),
