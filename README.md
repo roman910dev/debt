@@ -1,16 +1,11 @@
-# debt
+# Debt Tracker
 
-A new Flutter application.
+A Flutter application I built to start to experiment with Flutter. It is completely functional and works on all Flutter platforms and is actually published in [Google Play Store](https://play.google.com/store/apps/details?id=tk.roman910.debt).
 
-## Getting Started
+It should not be taken as a good example of Dart or Flutter programming as it one of my first projects and I have never rewriten it.
 
-This project is a starting point for a Flutter application.
+## About the app
 
-A few resources to get you started if this is your first Flutter project:
+A simple light-weight app to help you track how much money you owe people and how much they owe you, following the material design guidelines.
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+Keep track of the debts for each people and add different annotations with descriptions and dates to remember how much money is being owed and why.
