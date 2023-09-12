@@ -10,7 +10,7 @@ description: Light-weight app to track who owes and who you owe money to.
 version: 1.3.2
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.1.0 <3.0.0"
 
 module:
   androidX: true
@@ -20,16 +20,16 @@ dependencies:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  shared_preferences: ^0.5.6
-  firebase_admob: ^0.9.3
+  cupertino_icons: ^1.0.4
+  shared_preferences: ^2.0.13
+  firebase_admob: ^0.11.2
   intl: any
   #flutter_svg: 0.17.4
-  flutter_svg: ^0.19.2
-  url_launcher: ^5.4.7
-  flutter_share: ^1.0.2
-  currency_formatter: ^1.1.0
-#    path: 'C:\Users\roman_79tdu\Data\Coding\Flutter\currencies'
+  flutter_svg: ^1.0.3
+  url_launcher: ^6.0.20
+  flutter_share: ^2.0.0
+  expressions: ^0.2.3
+  currency_formatter: ^1.2.1
 
 dev_dependencies:
   flutter_test:
