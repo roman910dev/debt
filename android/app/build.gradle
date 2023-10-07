@@ -32,22 +32,29 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 31
+    namespace 'tk.roman910.debt'
+    compileSdk 33
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
-    lintOptions {
-        disable 'InvalidPackage'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
+
+    kotlinOptions {
+        jvmTarget=17
+    }
+
 
     defaultConfig {
         applicationId "tk.roman910.debt"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 11
-        versionName '1.4.0'
+        minSdkVersion 19
+        targetSdkVersion 33
+        versionCode 15
+        versionName '1.5.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 //        ndk {
@@ -71,6 +78,10 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    lint {
+        disable 'InvalidPackage'
+    }
+    namespace 'tk.roman910.debt'
 }
 
 flutter {
@@ -78,12 +89,13 @@ flutter {
 }
 
 dependencies {
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:21.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    implementation 'com.android.support:multidex:2.0.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
+android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'
