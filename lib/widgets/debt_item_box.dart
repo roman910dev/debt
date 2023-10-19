@@ -65,24 +65,26 @@ class _DebtItemBoxState extends State<DebtItemBox> {
               ),
       );
 
-  Widget _buildMoney(num money) => Text(
-        CurrencyFormatter.format(
-          money,
-          DebtSettings.currency,
-          compact: money >= 10,
-          decimal: 2,
-        ),
-        textAlign: TextAlign.end,
-        style: TextStyle(
-          color: _enabled
-              ? money < 0
-                  ? DebtColors.of(context).error
-                  : DebtColors.of(context).accent
-              : DebtColors.of(context).disabled,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      );
+  Widget _buildMoney(num money) => widget.item is Person && widget.item.checked
+      ? const SizedBox()
+      : Text(
+          CurrencyFormatter.format(
+            money,
+            DebtSettings.currency,
+            compact: money >= 100,
+            decimal: 2,
+          ),
+          textAlign: TextAlign.end,
+          style: TextStyle(
+            color: _enabled
+                ? money < 0
+                    ? DebtColors.of(context).error
+                    : DebtColors.of(context).accent
+                : DebtColors.of(context).disabled,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        );
 
   Widget _buildDate() => Text(
         widget.item.date.toFormattedString(),
@@ -97,7 +99,6 @@ class _DebtItemBoxState extends State<DebtItemBox> {
           : Container(
               decoration: BoxDecoration(
                 color: direction == DismissDirection.startToEnd
-                    // ? Colors.transparent
                     ? const Color(0xff222222)
                     : DebtColors.of(context).error,
                 borderRadius: const BorderRadius.all(Radius.circular(8)),

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:debt/config.dart';
+import 'package:debt/scripts/classes.dart';
 import 'package:debt/widgets/about_sheet.dart';
 import 'package:debt/widgets/calculator_dialog.dart';
 import 'package:debt/widgets/currency_dialog.dart';
@@ -6,8 +9,9 @@ import 'package:debt/widgets/hide_ads_dialog.dart';
 import 'package:debt/widgets/theme_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-enum MenuOption { theme, currency, calculator, ads, about }
+enum MenuOption { theme, currency, calculator, ads, about, prefs }
 
 class MenuButton extends StatelessWidget {
   final void Function()? onChanged;
@@ -25,6 +29,23 @@ class MenuButton extends StatelessWidget {
     return true;
   }
 
+  Future<bool?> _showPrefs(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (!context.mounted) return null;
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: SelectableText(
+          [
+            'people:\n${jsonEncode(people.people.toJson())}',
+            for (final key in prefs.getKeys()) '$key:\n${prefs.get(key)}'
+          ].join('\n\n'),
+        ),
+      ),
+    );
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) => PopupMenuButton<MenuOption>(
         itemBuilder: (context) => [
@@ -38,6 +59,7 @@ class MenuButton extends StatelessWidget {
             ),
           ],
           const PopupMenuItem(value: MenuOption.about, child: Text('About')),
+          if (devMode) const PopupMenuItem(value: MenuOption.prefs, child: Text('[DEV] Prefs')),
         ],
         onSelected: (value) async {
           final Future<bool?> changed = switch (value) {
@@ -60,6 +82,7 @@ class MenuButton extends StatelessWidget {
                 context: context,
                 builder: (context) => const AboutSheet(),
               ),
+            MenuOption.prefs => _showPrefs(context),
           };
           if (await changed == true) onChanged?.call();
         },

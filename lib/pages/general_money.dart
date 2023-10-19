@@ -159,17 +159,18 @@ class MoneyListState extends State<MoneyList> {
             : (people.people.firstWhereOrNull((p) => p.text == widget.personName)?.entries ?? [])
                 .cast();
         if (widget.personName != null && _items.isEmpty) Navigator.pop(context);
-        _items = _items.reversed.sorted((a, b) => a.compareTo(b));
+        _items = _items.debtSorted;
       });
 
   void _loadAd() {
     if (!DebtData.isMobile) return;
     if (DebtSettings.showAds && _bannerAd == null) {
       _bannerAd = BannerAd(
-        //prod:
-        adUnitId: 'ca-app-pub-8832562785647597/8322552151',
-        //test:
-        // adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+        adUnitId: devMode
+            ? //test
+            'ca-app-pub-3940256099942544/6300978111'
+            : //prod
+            'ca-app-pub-8832562785647597/8322552151',
         request: const AdRequest(),
         size: AdSize.banner,
         listener: BannerAdListener(

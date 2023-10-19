@@ -72,12 +72,12 @@ class DebtDialogState extends State<DebtDialog> {
         insetPadding: const EdgeInsets.all(16),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 740),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _buildTitle(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               _buildContent(),
               const SizedBox(height: 16),
               if (widget.onAction == null)

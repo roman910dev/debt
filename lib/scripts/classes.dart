@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:debt/config.dart';
 import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -128,10 +129,10 @@ class Person extends DebtItem {
   bool get checked => entries.every((e) => e.checked);
 
   @override
-  num get money => entries.map((e) => e.money).reduce((a, b) => a + b);
+  num get money => entries.balance;
 
   @override
-  DateTime get date => entries.map((e) => e.date).sorted((a, b) => b.compareTo(a)).first;
+  DateTime get date => entries.debtSorted.map((e) => e.date).first;
 
   @override
   Person withText(String text) => rename(text);
@@ -155,6 +156,13 @@ class Person extends DebtItem {
 
   @override
   List<List> toList() => [for (final e in entries) e.toList()];
+}
+
+extension DebtItems on Iterable<DebtItem> {
+  // using *where* may lead to an empty iterable, which would cause an error on *reduce*
+  num get balance => map((e) => e.checked ? 0 : e.money).reduce((a, b) => a + b);
+
+  List<DebtItem> get debtSorted => toList().reversed.sorted((a, b) => a.compareTo(b));
 }
 
 // TODO(roman910dev): move this somewhere else
@@ -181,7 +189,23 @@ extension People on List<Person> {
 
   static Future<List<Entry>> load([SharedPreferences? prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
-    if (['expr', 'dexpr'].any((k) => prefs!.containsKey(k))) {
+    if (devMode) {
+      return [
+        ['Ross', '', -10, 1697493601, false],
+        ['Joey', '', 750, 1697493602, false],
+        ['Rachel', '', 70, 1697493603, false],
+        ['Monica', '', -30, 1697493604, false],
+        ['Phoebe', '', 10, 1697493606, true],
+        ['Ross', '', 10, 1697493607, true],
+        ['Chandler', "McDonald's", 9.75, 1697493608, false],
+        ['Chandler', 'Duck', -24.99, 1697493609, false],
+        ['Chandler', 'Chick', -19.99, 1697493610, false],
+        ['Chandler', 'Armchair', -300, 1697493611, false],
+        ['Chandler', 'Pizza night', 15.48, 1697493612, false],
+        ['Chandler', 'Food', 8.7, 1697493613, false],
+        ['Chandler', 'Cinema', 9.1, 1697493614, true],
+      ].map(Entry.fromList).toList();
+    } else if (['expr', 'dexpr'].any((k) => prefs!.containsKey(k))) {
       final List<String> expr = prefs.getStringList('expr') ?? [];
       final List<String> dexpr = prefs.getStringList('dexpr') ?? [];
       return legacyParse(expr, dexpr);
@@ -215,7 +239,7 @@ class PeopleController extends ChangeNotifier {
   }
 
   void _setData() {
-    _prefs.setString('data', jsonEncode(people.toJson()));
+    if (!devMode) _prefs.setString('data', jsonEncode(people.toJson()));
     notifyListeners();
   }
 

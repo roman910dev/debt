@@ -29,10 +29,8 @@ class _BalanceState extends State<Balance> {
     super.dispose();
   }
 
-
-  num get _balance => (widget.selection.any ? widget.selection.selectedItems : widget.items)
-      .map((i) => i.money)
-      .reduce((a, b) => a + b);
+  num get _balance =>
+      (widget.selection.any ? widget.selection.selectedItems : widget.items).balance;
 
   @override
   Widget build(BuildContext context) => Row(
