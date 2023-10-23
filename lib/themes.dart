@@ -1,33 +1,37 @@
+import 'package:debt/config.dart';
 import 'package:flutter/material.dart';
 
-TextStyle _safariStyle({Color? color, FontWeight? fontWeight}) => TextStyle(
-      decoration: TextDecoration.underline,
-      decorationColor: Colors.white.withOpacity(.01),
+/// The default text styles used in the app themes.
+TextStyle _defaultStyle({Color? color, FontWeight? fontWeight}) => TextStyle(
       fontFamily: 'Roboto',
       fontFamilyFallback: const ['Helvetica', 'Arial', 'sans-serif'],
       color: color,
       fontWeight: fontWeight,
+      // iOS Web workaround
+      decoration: DebtEnv.iOSWeb ? TextDecoration.underline : null,
+      decorationColor: DebtEnv.iOSWeb ? Colors.white.withOpacity(.01) : null,
     );
 
-ThemeData lightTheme = ThemeData(
+/// The light theme of the app.
+final ThemeData lightTheme = ThemeData(
   // fontFamily: iOSWeb
   //     ? '--apple-system'
   //     : null,
   cardColor: Colors.white,
   primaryTextTheme: TextTheme(
-    displayLarge: _safariStyle(),
-    displayMedium: _safariStyle(),
-    displaySmall: _safariStyle(),
-    headlineMedium: _safariStyle(),
-    headlineSmall: _safariStyle(),
-    titleLarge: _safariStyle(color: Colors.green, fontWeight: FontWeight.w500),
-    titleMedium: _safariStyle(),
-    titleSmall: _safariStyle(),
-    bodyLarge: _safariStyle(),
-    bodyMedium: _safariStyle(),
-    bodySmall: _safariStyle(),
-    labelLarge: _safariStyle(),
-    labelSmall: _safariStyle(),
+    displayLarge: _defaultStyle(),
+    displayMedium: _defaultStyle(),
+    displaySmall: _defaultStyle(),
+    headlineMedium: _defaultStyle(),
+    headlineSmall: _defaultStyle(),
+    titleLarge: _defaultStyle(color: Colors.green, fontWeight: FontWeight.w500),
+    titleMedium: _defaultStyle(),
+    titleSmall: _defaultStyle(),
+    bodyLarge: _defaultStyle(),
+    bodyMedium: _defaultStyle(),
+    bodySmall: _defaultStyle(),
+    labelLarge: _defaultStyle(),
+    labelSmall: _defaultStyle(),
   ),
   appBarTheme: const AppBarTheme(
     titleTextStyle: TextStyle(
@@ -40,19 +44,19 @@ ThemeData lightTheme = ThemeData(
     color: Colors.white,
   ),
   textTheme: TextTheme(
-    displayLarge: _safariStyle(),
-    displayMedium: _safariStyle(),
-    displaySmall: _safariStyle(),
-    headlineMedium: _safariStyle(),
-    headlineSmall: _safariStyle(),
-    titleLarge: _safariStyle(fontWeight: FontWeight.w500),
-    titleMedium: _safariStyle(),
-    titleSmall: _safariStyle(),
-    bodyLarge: _safariStyle(fontWeight: FontWeight.w500),
-    bodyMedium: _safariStyle(),
-    bodySmall: _safariStyle(),
-    labelLarge: _safariStyle(fontWeight: FontWeight.w500),
-    labelSmall: _safariStyle(),
+    displayLarge: _defaultStyle(),
+    displayMedium: _defaultStyle(),
+    displaySmall: _defaultStyle(),
+    headlineMedium: _defaultStyle(),
+    headlineSmall: _defaultStyle(),
+    titleLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    titleMedium: _defaultStyle(),
+    titleSmall: _defaultStyle(),
+    bodyLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    bodyMedium: _defaultStyle(),
+    bodySmall: _defaultStyle(),
+    labelLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    labelSmall: _defaultStyle(),
   ),
   primaryIconTheme: const IconThemeData(color: Colors.green),
   textSelectionTheme: const TextSelectionThemeData(
@@ -65,24 +69,26 @@ ThemeData lightTheme = ThemeData(
       .copyWith(error: Colors.red),
 );
 
-ThemeData darkTheme = ThemeData(
+/// The dark theme of the app.
+final ThemeData darkTheme = ThemeData(
   // fontFamily: iOSWeb
   //     ? '-apple-system'
   //     : null,
   primaryTextTheme: TextTheme(
-    displayLarge: _safariStyle(),
-    displayMedium: _safariStyle(),
-    displaySmall: _safariStyle(),
-    headlineMedium: _safariStyle(),
-    headlineSmall: _safariStyle(),
-    titleLarge: _safariStyle(color: Colors.green[200], fontWeight: FontWeight.w500),
-    titleMedium: _safariStyle(),
-    titleSmall: _safariStyle(),
-    bodyLarge: _safariStyle(),
-    bodyMedium: _safariStyle(),
-    bodySmall: _safariStyle(),
-    labelLarge: _safariStyle(),
-    labelSmall: _safariStyle(),
+    displayLarge: _defaultStyle(),
+    displayMedium: _defaultStyle(),
+    displaySmall: _defaultStyle(),
+    headlineMedium: _defaultStyle(),
+    headlineSmall: _defaultStyle(),
+    titleLarge:
+        _defaultStyle(color: Colors.green[200], fontWeight: FontWeight.w500),
+    titleMedium: _defaultStyle(),
+    titleSmall: _defaultStyle(),
+    bodyLarge: _defaultStyle(),
+    bodyMedium: _defaultStyle(),
+    bodySmall: _defaultStyle(),
+    labelLarge: _defaultStyle(),
+    labelSmall: _defaultStyle(),
   ),
   appBarTheme: AppBarTheme(
     titleTextStyle: TextStyle(
@@ -94,19 +100,19 @@ ThemeData darkTheme = ThemeData(
     iconTheme: IconThemeData(color: Colors.green[200]),
   ),
   textTheme: TextTheme(
-    displayLarge: _safariStyle(),
-    displayMedium: _safariStyle(),
-    displaySmall: _safariStyle(),
-    headlineMedium: _safariStyle(),
-    headlineSmall: _safariStyle(),
-    titleLarge: _safariStyle(fontWeight: FontWeight.w500),
-    titleMedium: _safariStyle(),
-    titleSmall: _safariStyle(),
-    bodyLarge: _safariStyle(fontWeight: FontWeight.w500),
-    bodyMedium: _safariStyle(),
-    bodySmall: _safariStyle(),
-    labelLarge: _safariStyle(fontWeight: FontWeight.w500),
-    labelSmall: _safariStyle(),
+    displayLarge: _defaultStyle(),
+    displayMedium: _defaultStyle(),
+    displaySmall: _defaultStyle(),
+    headlineMedium: _defaultStyle(),
+    headlineSmall: _defaultStyle(),
+    titleLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    titleMedium: _defaultStyle(),
+    titleSmall: _defaultStyle(),
+    bodyLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    bodyMedium: _defaultStyle(),
+    bodySmall: _defaultStyle(),
+    labelLarge: _defaultStyle(fontWeight: FontWeight.w500),
+    labelSmall: _defaultStyle(),
   ),
   primaryIconTheme: IconThemeData(color: Colors.green[200]),
   textSelectionTheme: TextSelectionThemeData(
@@ -124,6 +130,8 @@ ThemeData darkTheme = ThemeData(
   ).copyWith(error: Colors.red[200]),
 );
 
+/// An abstract class used to get some custom colors for the app,
+/// depending on the current theme.
 abstract class DebtColors {
   BuildContext get _context;
 
@@ -136,11 +144,13 @@ abstract class DebtColors {
   Color get error => Theme.of(_context).colorScheme.error;
   Color get accent => Theme.of(_context).colorScheme.secondary;
 
-  static DebtColors of(BuildContext context) => Theme.of(context).brightness == Brightness.dark
-      ? DebtDarkColors(context)
-      : DebtLightColors(context);
+  static DebtColors of(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? DebtDarkColors(context)
+          : DebtLightColors(context);
 }
 
+/// The custom dark colors of the app.
 class DebtDarkColors extends DebtColors {
   @override
   final BuildContext _context;
@@ -155,6 +165,7 @@ class DebtDarkColors extends DebtColors {
   DebtDarkColors(BuildContext context) : _context = context;
 }
 
+/// The custom light colors of the app.
 class DebtLightColors extends DebtColors {
   @override
   final BuildContext _context;

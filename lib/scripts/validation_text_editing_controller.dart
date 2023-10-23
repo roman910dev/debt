@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A [TextEditingController] that can be used to validate its text using a [validator].
 class ValidationTextEditingController extends TextEditingController {
   final bool Function(String)? validator;
 

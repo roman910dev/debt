@@ -7,6 +7,14 @@ import 'package:expressions/expressions.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+/// The controller for an [AmountField].
+///
+/// It allows the user to enter an amount of money.
+///
+/// It can be a number or an expression (refer to [ExpressionEvaluator]) that evaluates to a number.
+///
+/// Numbers can either use the decimal separator specified in [DebtSettings.currency] or a period (`.`).
+/// They must not include a thousands separator.
 class AmountFieldController extends ValidationTextEditingController {
   bool _valid = true;
   bool _positive = true;
@@ -14,8 +22,13 @@ class AmountFieldController extends ValidationTextEditingController {
   @override
   bool get valid => _valid;
 
+  /// Whether the amount is positive (`true`) or negative (`false`).
   bool get positive => _positive;
 
+  /// The modulus of the expression in the text field.
+  /// It is equal to [amount] unsigned, this is always positive.
+  ///
+  /// If the expression is invalid, this will be `null`.
   num? get modulus {
     try {
       String val = text.replaceAll(DebtSettings.currency.decimalSeparator, '.');
@@ -26,11 +39,19 @@ class AmountFieldController extends ValidationTextEditingController {
     }
   }
 
+  /// The amount of money in the text field.
+  /// It is equal to [modulus] signed, this can be positive or negative.
+  ///
+  /// If the expression is invalid, this will be `null`.
   num? get amount => modulus != null ? modulus! * (_positive ? 1 : -1) : null;
 
-  void togglePositive() => _positive = !_positive;
+  /// Toggles the sign of the amount.
+  ///
+  /// If the amount was positive it makes it negative and vice versa.
+  void toggleSign() => _positive = !_positive;
 }
 
+/// A text field that allows the user to enter an amount of money.
 class AmountField extends StatefulWidget {
   final AmountFieldController controller;
   final bool autofocus;
@@ -51,14 +72,15 @@ class _AmountFieldState extends State<AmountField> {
   void _onChanged(val) {
     try {
       if (val.trim() == '-') {
-        widget.controller.togglePositive();
+        // if the user enters a negative sign, toggle the sign instead of setting the text to '-'
+        widget.controller.toggleSign();
         widget.controller.text = '';
         widget.controller._valid = true;
       } else {
         final num? modulus = widget.controller.modulus;
         widget.controller._valid = modulus != null;
         if (modulus != null && modulus < 0) {
-          widget.controller.togglePositive();
+          widget.controller.toggleSign();
           widget.controller.text = widget.controller.text.replaceAll('-', '');
         }
       }
@@ -79,7 +101,7 @@ class _AmountFieldState extends State<AmountField> {
                 : DebtColors.of(context).error
             : DebtColors.of(context).text,
         padding: EdgeInsets.zero,
-        onPressed: () => setState(() => widget.controller.togglePositive()),
+        onPressed: () => setState(() => widget.controller.toggleSign()),
       );
 
   Widget _buildTextField() => TextField(
@@ -87,9 +109,12 @@ class _AmountFieldState extends State<AmountField> {
         onChanged: _onChanged,
         textAlign: TextAlign.left,
         autofocus: widget.autofocus,
-        keyboardType: DebtSettings.calculatorEnabled
+        keyboardType: DebtSettings.calculatorInput
             ? null
-            : const TextInputType.numberWithOptions(signed: true, decimal: true),
+            : const TextInputType.numberWithOptions(
+                signed: true,
+                decimal: true,
+              ),
         cursorColor: widget.controller.valid && widget.controller.positive
             ? DebtColors.of(context).accent
             : DebtColors.of(context).error,

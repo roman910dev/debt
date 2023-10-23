@@ -1,6 +1,7 @@
 import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
 
+/// A text field that allows to input a description for debt items.
 class DescriptionField extends StatelessWidget {
   final TextEditingController controller;
   final bool autofocus;
@@ -18,7 +19,10 @@ class DescriptionField extends StatelessWidget {
         controller: controller,
         maxLines: null,
         autofocus: autofocus,
-        decoration: DebtInputDecoration(context, labelText: 'Description (optional)'),
+        decoration: DebtInputDecoration(
+          context,
+          labelText: 'Description (optional)',
+        ),
         onEditingComplete: onEditingComplete,
       );
 }

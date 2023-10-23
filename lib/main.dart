@@ -1,5 +1,5 @@
 import 'package:debt/config.dart';
-import 'package:debt/pages/general_money.dart';
+import 'package:debt/pages/entry_list/entry_list.dart';
 import 'package:debt/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DebtSettings.load();
-  if (DebtData.isMobile) MobileAds.instance.initialize();
+  if (DebtEnv.isMobile) MobileAds.instance.initialize();
   people.initialize();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         builder: (context, theme, _) => MaterialApp(
           color: Colors.white,
           title: 'Debt Tracker',
-          home: const MoneyList(null),
+          home: const EntryList(null),
           debugShowCheckedModeBanner: false,
           themeMode: theme,
           theme: lightTheme,

@@ -1,6 +1,7 @@
 import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
 
+/// A field that allows the user to select a date.
 class DateField extends StatefulWidget {
   final TextEditingController controller;
   const DateField({super.key, required this.controller});
@@ -17,7 +18,9 @@ class _DateFieldState extends State<DateField> {
       firstDate: DateTime.utc(1900),
       lastDate: DateTime.now(),
     );
-    if (date != null) setState(() => widget.controller.text = date.toFormattedString());
+    if (date != null) {
+      setState(() => widget.controller.text = date.toFormattedString());
+    }
   }
 
   void _setInitialDate() {

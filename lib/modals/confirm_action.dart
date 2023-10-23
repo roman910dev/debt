@@ -1,25 +1,30 @@
 import 'package:debt/scripts/classes.dart';
-import 'package:debt/themes.dart';
 import 'package:debt/tools.dart';
-import 'package:debt/widgets/debt_edit_dialog.dart';
-import 'package:debt/widgets/selection_controller.dart';
+import 'package:debt/modals/debt_dialog.dart';
+import 'package:debt/scripts/selection_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+/// An action on a list of [DebtItem]s and a selection that only requires a confirmation from the user.
+///
+/// For example, *edit* is not included here because it needs some input from the user,
+/// not just a confirmation.
+///
+/// It is defined by a [name], an [icon], and an action ([onConfirm]).
 class ConfirmAction {
   final String name;
   final IconData icon;
-  final bool accentColor;
-  List<DebtItem> Function(List<DebtItem>, SelectionController<DebtItem>) onConfirm;
+  List<DebtItem> Function(List<DebtItem>, SelectionController<DebtItem>)
+      onConfirm;
 
-  ConfirmAction._(this.name, this.icon, this.accentColor, this.onConfirm);
+  ConfirmAction._(this.name, this.icon, this.onConfirm);
 }
 
+/// Abstract class containing some [ConfirmAction]s.
 abstract class ConfirmActions {
   static final check = ConfirmAction._(
     'check',
     Symbols.check_circle,
-    true,
     (items, selection) => [
       for (final i in items) selection.isSelected(i) ? i.withChecked(true) : i,
     ],
@@ -28,7 +33,6 @@ abstract class ConfirmActions {
   static final uncheck = ConfirmAction._(
     'uncheck',
     Symbols.unpublished,
-    false,
     (items, selection) => [
       for (final i in items) selection.isSelected(i) ? i.withChecked(false) : i,
     ],
@@ -37,7 +41,6 @@ abstract class ConfirmActions {
   static final delete = ConfirmAction._(
     'delete',
     Symbols.delete,
-    true,
     (items, selection) => [
       for (final i in items)
         if (!selection.isSelected(i)) i,
@@ -47,6 +50,9 @@ abstract class ConfirmActions {
   static final List<ConfirmAction> values = [check, uncheck, delete];
 }
 
+/// An icon button that opens a [ConfirmDialog] based on [action].
+///
+/// When the dialog is closed, [onConfirm] is called with the result.
 class ConfirmButton extends StatelessWidget {
   final ConfirmAction action;
   final List<DebtItem> items;
@@ -64,10 +70,7 @@ class ConfirmButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
         tooltip: action.name.toFirstUpperCase(),
-        icon: Icon(
-          action.icon,
-          color: action.accentColor ? DebtColors.of(context).accent : null,
-        ),
+        icon: Icon(action.icon),
         onPressed: () => showDialog<List<DebtItem>>(
           context: context,
           builder: (context) => ConfirmDialog(
@@ -79,6 +82,9 @@ class ConfirmButton extends StatelessWidget {
       );
 }
 
+/// A dialog that asks the user to confirm an [action] on some [items] and a [selection].
+///
+/// Upon confirmation, [action.onConfirm] is called and the result is passed in the [Navigator.pop] call.
 class ConfirmDialog extends StatelessWidget {
   final ConfirmAction action;
   final List<DebtItem> items;
@@ -98,10 +104,11 @@ class ConfirmDialog extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
             'Are you sure you want to ${action.name}'
-            ' ${selection.length > 1 ? 'multiple items' : 'this item'}?',
+            ' ${selection.size > 1 ? 'multiple items' : 'this item'}?',
           ),
         ),
         action: action.name.toFirstUpperCase(),
-        onAction: () => Navigator.of(context).pop(action.onConfirm(items, selection)),
+        onAction: () =>
+            Navigator.of(context).pop(action.onConfirm(items, selection)),
       );
 }

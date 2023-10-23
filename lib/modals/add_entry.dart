@@ -4,31 +4,44 @@ import 'package:debt/scripts/validation_text_editing_controller.dart';
 import 'package:debt/tools.dart';
 import 'package:debt/widgets/amount_field.dart';
 import 'package:debt/widgets/date_field.dart';
-import 'package:debt/widgets/debt_edit_dialog.dart';
+import 'package:debt/modals/debt_dialog.dart';
 import 'package:debt/widgets/description_field.dart';
 import 'package:debt/widgets/name_field.dart';
 import 'package:flutter/material.dart';
 
-class AddDialog extends StatefulWidget {
+/// A dialog that allows the user to add a new entry.
+///
+/// If [personName] is not `null`, the dialog will be pre-filled with the person's name,
+/// which the user will not be able to change.
+///
+/// Otherwise, the user will be able to set the person.
+/// If the user sets a person that does not exist, a new person will be created.
+class AddEntryDialog extends StatefulWidget {
+  /// The name of the person whom the entry will be added to.
+  /// If `null`, the user will be able to set the person.
   final String? personName;
-  const AddDialog({super.key, this.personName});
+
+  const AddEntryDialog({super.key, this.personName});
 
   @override
-  createState() => AddDialogState();
+  createState() => AddEntryDialogState();
 }
 
-class AddDialogState extends State<AddDialog> {
-  final _nameController = ValidationTextEditingController(validator: (data) => data.isNotEmpty);
+class AddEntryDialogState extends State<AddEntryDialog> {
+  String? _error;
+
+  final _nameController = ValidationTextEditingController(
+    validator: (data) => data.isNotEmpty,
+  );
   final _descriptionController = TextEditingController();
   final _amountController = AmountFieldController();
   final _dateController = TextEditingController();
 
   void _onSave() {
-    String? error;
     if (!_nameController.valid) {
-      error = 'Name cannot be empty!';
+      _error = 'Name cannot be empty!';
     } else if (_amountController.amount == null) {
-      error = '${DebtSettings.currency.symbol} is invalid!';
+      _error = '${DebtSettings.currency.symbol} is invalid!';
     } else {
       people.addEntry(
         Entry(
@@ -40,14 +53,13 @@ class AddDialogState extends State<AddDialog> {
       );
       return Navigator.of(context).pop();
     }
-    // FIXME: snackbar over dialog
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    setState(() {});
   }
 
   Widget _buildName() => NameField(
         personName: widget.personName,
         controller: _nameController,
-        autofocus: !DebtData.iOSWeb && widget.personName == null,
+        autofocus: !DebtEnv.iOSWeb && widget.personName == null,
         onEditingComplete: _onSave,
       );
 
@@ -58,7 +70,7 @@ class AddDialogState extends State<AddDialog> {
 
   Widget _buildAmount() => AmountField(
         controller: _amountController,
-        autofocus: !DebtData.iOSWeb && widget.personName != null,
+        autofocus: !DebtEnv.iOSWeb && widget.personName != null,
         onEditingComplete: _onSave,
       );
 
@@ -69,6 +81,7 @@ class AddDialogState extends State<AddDialog> {
         title: 'Add entry',
         action: 'Save',
         onAction: _onSave,
+        error: _error,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[

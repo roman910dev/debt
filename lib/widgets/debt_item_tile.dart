@@ -1,23 +1,29 @@
 import 'package:currency_formatter/currency_formatter.dart';
 import 'package:debt/config.dart';
-import 'package:debt/pages/general_money.dart';
+import 'package:debt/pages/entry_list/entry_list.dart';
 import 'package:debt/scripts/classes.dart';
 import 'package:debt/themes.dart';
 import 'package:debt/tools.dart';
-import 'package:debt/widgets/confirm_dialog.dart';
-import 'package:debt/widgets/selection_controller.dart';
+import 'package:debt/modals/confirm_action.dart';
+import 'package:debt/scripts/selection_controller.dart';
 import 'package:flutter/material.dart';
 
-class DebtItemBox extends StatefulWidget {
+/// A tile that displays a [DebtItem].
+class DebtItemTile extends StatefulWidget {
+  /// The item to display.
   final DebtItem item;
+
+  /// The selection controller of the page.
+  /// Used to know if the item is selected.
   final SelectionController<DebtItem> selection;
-  const DebtItemBox({super.key, required this.item, required this.selection});
+
+  const DebtItemTile({super.key, required this.item, required this.selection});
 
   @override
-  State<DebtItemBox> createState() => _DebtItemBoxState();
+  State<DebtItemTile> createState() => _DebtItemTileState();
 }
 
-class _DebtItemBoxState extends State<DebtItemBox> {
+class _DebtItemTileState extends State<DebtItemTile> {
   bool _selected = false;
   bool _selectionMode = false;
 
@@ -36,7 +42,8 @@ class _DebtItemBoxState extends State<DebtItemBox> {
 
   bool get _enabled => !widget.item.checked;
 
-  bool get _dismissible => widget.item is Entry && !widget.item.checked && !_selectionMode;
+  bool get _dismissible =>
+      widget.item is Entry && !widget.item.checked && !_selectionMode;
 
   @override
   void initState() {
@@ -57,11 +64,15 @@ class _DebtItemBoxState extends State<DebtItemBox> {
                 fontFamily: 'ProductSans',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: _enabled ? DebtColors.of(context).title : DebtColors.of(context).disabled,
+                color: _enabled
+                    ? DebtColors.of(context).title
+                    : DebtColors.of(context).disabled,
               )
             : TextStyle(
                 fontSize: 16,
-                color: _enabled ? DebtColors.of(context).title : DebtColors.of(context).disabled,
+                color: _enabled
+                    ? DebtColors.of(context).title
+                    : DebtColors.of(context).disabled,
               ),
       );
 
@@ -89,13 +100,19 @@ class _DebtItemBoxState extends State<DebtItemBox> {
   Widget _buildDate() => Text(
         widget.item.date.toFormattedString(),
         style: TextStyle(
-          color: _enabled ? DebtColors.of(context).text : DebtColors.of(context).disabled,
+          color: _enabled
+              ? DebtColors.of(context).text
+              : DebtColors.of(context).disabled,
         ),
       );
 
-  Widget _buildDismissibleBackground(DismissDirection direction) =>
-      ![DismissDirection.startToEnd, DismissDirection.endToStart].contains(direction)
-          ? throw 'Invalid direction: $direction. Only startToEnd and endToStart are allowed.'
+  Widget _buildDismissibleBackground(DismissDirection direction) => ![
+        DismissDirection.startToEnd,
+        DismissDirection.endToStart,
+      ].contains(direction)
+          ? throw ''
+              'Invalid direction: $direction. '
+              'Only startToEnd and endToStart are allowed.'
           : Container(
               decoration: BoxDecoration(
                 color: direction == DismissDirection.startToEnd
@@ -158,7 +175,9 @@ class _DebtItemBoxState extends State<DebtItemBox> {
               onTap: widget.item is Person
                   ? () => delay(200).then(
                         (_) => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MoneyList(widget.item.text)),
+                          MaterialPageRoute(
+                            builder: (context) => EntryList(widget.item.text),
+                          ),
                         ),
                       )
                   : null,
@@ -189,7 +208,9 @@ class _DebtItemBoxState extends State<DebtItemBox> {
             child: Dismissible(
               key: Key(widget.item.toString()),
               onDismissed: (DismissDirection direction) {
-                if (direction == DismissDirection.startToEnd) people.setChecked(widget.item, true);
+                if (direction == DismissDirection.startToEnd) {
+                  people.setChecked(widget.item, true);
+                }
               },
               confirmDismiss: (DismissDirection direction) async {
                 if (direction == DismissDirection.startToEnd) return true;
@@ -211,8 +232,10 @@ class _DebtItemBoxState extends State<DebtItemBox> {
                 return null;
               },
               // resizeDuration: null,
-              background: _buildDismissibleBackground(DismissDirection.startToEnd),
-              secondaryBackground: _buildDismissibleBackground(DismissDirection.endToStart),
+              background:
+                  _buildDismissibleBackground(DismissDirection.startToEnd),
+              secondaryBackground:
+                  _buildDismissibleBackground(DismissDirection.endToStart),
               child: decoration,
             ),
           )

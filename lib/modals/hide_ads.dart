@@ -1,7 +1,11 @@
 import 'package:debt/config.dart';
-import 'package:debt/widgets/debt_edit_dialog.dart';
+import 'package:debt/modals/debt_dialog.dart';
 import 'package:flutter/material.dart';
 
+/// A dialog that allows to hide the ads of the app.
+/// 
+/// It explains that the ads are the only profit the developer gets from the app,
+/// and that they can be hidden for free.
 class HideAdsDialog extends StatelessWidget {
   const HideAdsDialog({super.key});
 

@@ -1,15 +1,17 @@
 import 'package:debt/config.dart';
 import 'package:debt/tools.dart';
-import 'package:debt/widgets/debt_edit_dialog.dart';
+import 'package:debt/modals/debt_dialog.dart';
 import 'package:flutter/material.dart';
 
-class ThemeDialog extends StatelessWidget {
-  const ThemeDialog({super.key});
+/// A dialog that allows to select a theme for the app.
+class ThemeSettingsDialog extends StatelessWidget {
+  const ThemeSettingsDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
     ThemeMode option = DebtSettings.theme;
     return DebtDialog(
+      maxWidth: 480,
       title: 'Select Theme',
       content: StatefulBuilder(
         builder: (context, setState) => Container(
@@ -19,7 +21,9 @@ class ThemeDialog extends StatelessWidget {
             itemCount: ThemeMode.values.length,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, i) => RadioListTile(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
               title: Text(ThemeMode.values[i].name.toFirstUpperCase()),
               value: ThemeMode.values[i],
               groupValue: option,

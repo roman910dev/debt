@@ -53,8 +53,8 @@ android {
         applicationId "tk.roman910.debt"
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 16
-        versionName '1.5.1'
+        versionCode 17
+        versionName '1.5.2'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 //        ndk {

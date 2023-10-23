@@ -4,24 +4,26 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Interface for the data of the buttons displayed in the [AboutSheet].
 class _AboutData {
   final IconData leading;
   final String title;
   final String subtitle;
-  final String action;
+  final String? uri;
 
-  const _AboutData(this.leading, this.title, this.subtitle, this.action);
+  const _AboutData(this.leading, this.title, this.subtitle, this.uri);
 }
 
+/// A bottom sheet that displays information about the app and the developer.
 class AboutSheet extends StatelessWidget {
   const AboutSheet({super.key});
 
-  static const List<_AboutData> _aboutInfo = [
+  static const List<_AboutData> _aboutData = [
     _AboutData(
       Symbols.share,
       'Tell your friends about this app',
       'Share this app',
-      'share',
+      null,
     ),
     _AboutData(
       Symbols.web,
@@ -43,20 +45,18 @@ class AboutSheet extends StatelessWidget {
     ),
   ];
 
-  Future<void> _share(_AboutData aboutData) async {
-    if (aboutData.action == 'share') {
-      // TODO(roman910dev): decide sharing method
+  Future<void> _onAction(String? uri) async {
+    if (uri == null) {
       Share.share(
         'Hey! Check out this app. It helps me to keep track of my money.\n'
         'https://play.google.com/store/apps/details?id=tk.roman910.debt',
         subject: 'Debt Tracker',
-        // chooserTitle: 'Debt Tracker',
-        // linkUrl: 'https://play.google.com/store/apps/details?id=tk.roman910.debt',
-        // text: 'Hey! Check out this app. It helps me to keep track of my money.',
       );
     } else {
-      Uri? url = Uri.tryParse(aboutData.action);
-      if (url != null && await canLaunchUrl(url)) await launchUrl(url, webOnlyWindowName: '_blank');
+      Uri? url = Uri.tryParse(uri);
+      if (url != null && await canLaunchUrl(url)) {
+        await launchUrl(url, webOnlyWindowName: '_blank');
+      }
     }
   }
 
@@ -104,22 +104,25 @@ class AboutSheet extends StatelessWidget {
         ),
       );
 
+  Widget _actionItem(BuildContext context, _AboutData data) => ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+        leading: Icon(
+          data.leading,
+          color: Theme.of(context).textTheme.bodyMedium!.color,
+        ),
+        title: Text(
+          data.title,
+          style: const TextStyle(fontSize: 16),
+        ),
+        subtitle: Text(data.subtitle),
+        onTap: () => _onAction(data.uri),
+      );
+
   Widget _buildActionsList(BuildContext context) => Column(
         children: [
-          for (final info in _aboutInfo)
-            ListTile(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              leading: Icon(
-                info.leading,
-                color: Theme.of(context).textTheme.bodyMedium!.color,
-              ),
-              title: Text(
-                info.title,
-                style: const TextStyle(fontSize: 16),
-              ),
-              subtitle: Text(info.subtitle),
-              onTap: () => _share(info),
-            ),
+          for (final data in _aboutData) _actionItem(context, data),
         ],
       );
 
@@ -143,7 +146,8 @@ class AboutSheet extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 300, maxWidth: 350),
+                  constraints:
+                      const BoxConstraints(maxHeight: 300, maxWidth: 350),
                   child: _buildActionsList(context),
                 ),
               ),

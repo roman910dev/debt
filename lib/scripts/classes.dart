@@ -6,19 +6,41 @@ import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// An immutable abstract class representing a debt item.
+///
+/// This is the parent class of [Entry] and [Person].
 sealed class DebtItem {
+  /// The text of the item.
+  ///
+  /// This is [Entry.description] for [Entry]s and [Person.name] for [Person]s.
   String get text;
+
+  /// The amount of money of the item.
   num get money;
+
+  /// The date of the item.
   DateTime get date;
+
+  /// Whether the item is checked.
   bool get checked;
 
+  /// Creates a copy of the item with the given text.
   DebtItem withText(String text);
+
+  /// Creates a copy of the item with the given checked value.
   DebtItem withChecked(bool checked);
+
+  /// Returns the item with the renamed [person].
+  DebtItem rename(String personName);
 
   const DebtItem();
 
   List toList();
 
+  /// Compares this item to an[other] one.
+  ///
+  /// The comparison is based on [checked] (unchecked first).
+  /// If [checked] is equal, the comparison is based on [date] (latest date first).
   int compareTo(DebtItem other) => checked == other.checked
       ? -date.compareTo(other.date)
       : checked
@@ -41,8 +63,12 @@ sealed class DebtItem {
 }
 
 class Entry extends DebtItem {
+  /// The person who this entry refers to.
   final String person;
+
+  /// The description of the entry.
   final String description;
+
   @override
   final num money;
   @override
@@ -50,6 +76,7 @@ class Entry extends DebtItem {
   @override
   final bool checked;
 
+  /// The [description] of the entry.
   @override
   String get text => description;
 
@@ -61,7 +88,7 @@ class Entry extends DebtItem {
     this.checked = false,
   });
 
-  Entry copyWith({
+  Entry _copyWith({
     String? person,
     String? description,
     num? money,
@@ -79,16 +106,18 @@ class Entry extends DebtItem {
   @override
   Entry withText(String text) => withDescription(text);
 
-  Entry withDescription(String description) => copyWith(description: description);
+  Entry withDescription(String description) =>
+      _copyWith(description: description);
 
-  Entry withDate(DateTime date) => copyWith(date: date);
+  Entry withDate(DateTime date) => _copyWith(date: date);
 
   @override
-  Entry withChecked(bool checked) => copyWith(checked: checked);
+  Entry withChecked(bool checked) => _copyWith(checked: checked);
 
-  Entry rename(String person) => copyWith(person: person);
+  @override
+  Entry rename(String personName) => _copyWith(person: personName);
 
-  Entry.legacyParse(String data, {bool checked = false})
+  Entry._legacyParse(String data, {bool checked = false})
       : this(
           money: num.parse(data.split('~|~')[0]),
           person: data.split('~|~')[1],
@@ -97,6 +126,9 @@ class Entry extends DebtItem {
           checked: checked,
         );
 
+  /// Parses a list of data into an [Entry].
+  ///
+  /// List must follow the format defined in [toList].
   Entry.fromList(List data)
       : this(
           person: data[0],
@@ -106,6 +138,10 @@ class Entry extends DebtItem {
           checked: data[4],
         );
 
+  /// Returns a list of data representing the entry.
+  ///
+  /// The list follows the format:
+  /// `[person, description, money, date, checked]`.
   @override
   List toList() => [
         person,
@@ -117,11 +153,15 @@ class Entry extends DebtItem {
 }
 
 class Person extends DebtItem {
+  /// The name of the person.
   final String name;
+
+  /// The list of entries of the person.
   final List<Entry> entries;
 
   const Person({required this.name, required this.entries});
 
+  /// The [name] of the person.
   @override
   String get text => name;
 
@@ -131,6 +171,7 @@ class Person extends DebtItem {
   @override
   num get money => entries.balance;
 
+  /// The latest date of the entries of the person.
   @override
   DateTime get date => entries.debtSorted.map((e) => e.date).first;
 
@@ -143,15 +184,19 @@ class Person extends DebtItem {
         entries: [for (final e in entries) e.withChecked(checked)],
       );
 
-  Person rename(String name) => Person(
-        name: name,
-        entries: [for (final e in entries) e.rename(name)],
+  @override
+  Person rename(String personName) => Person(
+        name: personName,
+        entries: [for (final e in entries) e.rename(personName)],
       );
 
   Person.fromList(String person, List<List> data)
       : this(
           name: person,
-          entries: [for (final e in data.where((d) => d[0] == person)) Entry.fromList(e)],
+          entries: [
+            for (final e in data.where((d) => d[0] == person))
+              Entry.fromList(e),
+          ],
         );
 
   @override
@@ -160,17 +205,27 @@ class Person extends DebtItem {
 
 extension DebtItems on Iterable<DebtItem> {
   // using *where* may lead to an empty iterable, which would cause an error on *reduce*
-  num get balance => map((e) => e.checked ? 0 : e.money).reduce((a, b) => a + b);
+  /// Returns the balance of the items. This is the sum of their [DebtItem.money] values.
+  ///
+  /// For [DebtItem.checked] items, the balance is 0.
+  num get balance =>
+      map((e) => e.checked ? 0 : e.money).reduce((a, b) => a + b);
 
-  List<DebtItem> get debtSorted => toList().reversed.sorted((a, b) => a.compareTo(b));
+  /// Returns the items sorted by [DebtItem.checked] and [DebtItem.date],
+  /// using [DebtItem.compareTo].
+  List<DebtItem> get debtSorted =>
+      toList().reversed.sorted((a, b) => a.compareTo(b));
 }
 
-// TODO(roman910dev): move this somewhere else
 extension People on List<Person> {
-  static List<Entry> legacyParse(List<String> unchecked, List<String> checked) => [
+  static List<Entry> _legacyParse(
+    List<String> unchecked,
+    List<String> checked,
+  ) =>
+      [
         for (final entries in [unchecked, checked]) ...[
           for (final entry in entries.reversed) ...[
-            Entry.legacyParse(entry, checked: entries == checked),
+            Entry._legacyParse(entry, checked: entries == checked),
           ],
         ],
       ];
@@ -179,8 +234,8 @@ extension People on List<Person> {
         for (final p in {for (final d in data) d[0]}) Person.fromList(p, data),
       ];
 
-  List<List> toJson() =>
-      [for (final p in this) ...p.toList()].sorted((a, b) => a[3].compareTo(b[3]));
+  List<List> toJson() => [for (final p in this) ...p.toList()]
+      .sorted((a, b) => a[3].compareTo(b[3]));
 
   String toCSV() => toJson().map((e) {
         e[3] = DebtDateTime.fromSecondsSinceEpoch(e[3]).toFormattedString();
@@ -189,7 +244,7 @@ extension People on List<Person> {
 
   static Future<List<Entry>> load([SharedPreferences? prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
-    if (devMode) {
+    if (DebtEnv.devMode) {
       return [
         ['Ross', '', -10, 1697493601, false],
         ['Joey', '', 750, 1697493602, false],
@@ -208,15 +263,17 @@ extension People on List<Person> {
     } else if (['expr', 'dexpr'].any((k) => prefs!.containsKey(k))) {
       final List<String> expr = prefs.getStringList('expr') ?? [];
       final List<String> dexpr = prefs.getStringList('dexpr') ?? [];
-      return legacyParse(expr, dexpr);
+      return _legacyParse(expr, dexpr);
     } else if (prefs.containsKey('data')) {
-      final List<List> data = jsonDecode(prefs.getString('data')!).cast<List>() as List<List>;
+      final List<List> data =
+          jsonDecode(prefs.getString('data')!).cast<List>() as List<List>;
       return [for (final d in data) Entry.fromList(d)];
     }
     return [];
   }
 }
 
+/// A controller that manages a list of [Person]s ([people]).
 class PeopleController extends ChangeNotifier {
   bool _initialized = false;
   final List<Person> people = [];
@@ -224,12 +281,16 @@ class PeopleController extends ChangeNotifier {
 
   PeopleController();
 
+  /// Whether the controller has been initialized.
+  ///
+  /// This is `true` after [initialize] is called.
   bool get initialized => _initialized;
 
   void _legacyCleanup() => _prefs
     ..remove('expr')
     ..remove('dexpr');
 
+  /// Initializes the controller. This can only be done once.
   Future<void> initialize() async {
     _initialized = true;
     _prefs = await SharedPreferences.getInstance();
@@ -239,15 +300,25 @@ class PeopleController extends ChangeNotifier {
   }
 
   void _setData() {
-    if (!devMode) _prefs.setString('data', jsonEncode(people.toJson()));
+    if (!DebtEnv.devMode) _prefs.setString('data', jsonEncode(people.toJson()));
     notifyListeners();
   }
 
-  Person _parent(Entry entry) => people.firstWhere((p) => p.name == entry.person);
+  /// Returns the [Person] that contains [entry].
+  Person _parent(Entry entry) =>
+      people.firstWhere((p) => p.name == entry.person);
 
+  /// Wether dates [a] and [b] are the same day of the same month of the same year.
   bool _sameDate(DateTime a, DateTime b) =>
       a.day == b.day && a.month == b.month && a.year == b.year;
 
+  /// If [date] is the same date as one of the dates of the entries of the people,
+  /// it returns the latest date plus 1 second.
+  ///
+  /// Otherwise, it returns the [date] itself.
+  ///
+  /// Note that dates are always returned without time,
+  /// so at 0:00 (plus the added seconds to avoid date collisions).
   DateTime _sortableDate(DateTime date) => DateTime.fromMillisecondsSinceEpoch(
         ([for (final p in people) ...p.entries]
                         .map((e) => e.date)
@@ -260,8 +331,7 @@ class PeopleController extends ChangeNotifier {
             1000,
       );
 
-  void setChecked(DebtItem item, bool checked) => replace(item, item.withChecked(checked));
-
+  /// Replaces [oldItem] with [newItem], if they are of the same type.
   void replace(DebtItem oldItem, DebtItem newItem) {
     if (oldItem is Person && newItem is Person) {
       final int index = people.indexOf(oldItem);
@@ -270,12 +340,21 @@ class PeopleController extends ChangeNotifier {
       final Person person = _parent(oldItem);
       final int entryIndex = person.entries.indexOf(oldItem);
       person.entries[entryIndex] = newItem.withDate(
-        _sameDate(newItem.date, oldItem.date) ? oldItem.date : _sortableDate(newItem.date),
+        _sameDate(newItem.date, oldItem.date)
+            ? oldItem.date
+            : _sortableDate(newItem.date),
       );
     }
     _setData();
   }
 
+  /// Sets the [checked] value of [item] to [checked].
+  void setChecked(DebtItem item, bool checked) =>
+      replace(item, item.withChecked(checked));
+
+  /// Replaces all the existing items with [newItems].
+  ///
+  /// [newItems] must not be empty, use [clearAll] to clear all entries.
   void replaceAll(List<DebtItem> newItems) {
     if (newItems.isEmpty) {
       throw ArgumentError.value(
@@ -299,6 +378,9 @@ class PeopleController extends ChangeNotifier {
     _setData();
   }
 
+  /// If [personName] is `null`, clears all [Person]s.
+  ///
+  /// Otherwise, reomoves the [Person] with the given name.
   void clearAll(String? personName) {
     if (personName == null) {
       people.clear();
@@ -310,7 +392,8 @@ class PeopleController extends ChangeNotifier {
   }
 
   void _addEntry(Entry entry) {
-    final Person? person = people.firstWhereOrNull((p) => p.name == entry.person);
+    final Person? person =
+        people.firstWhereOrNull((p) => p.name == entry.person);
     final Entry correctedEntry = entry.withDate(_sortableDate(entry.date));
     if (person == null) {
       people.add(Person(name: entry.person, entries: [correctedEntry]));
@@ -319,6 +402,16 @@ class PeopleController extends ChangeNotifier {
     }
   }
 
+  /// Adds [entry] to the list of entries of the person with the same name,
+  /// or creates a new person if it doesn't exist.
+  void addEntry(Entry entry) {
+    _addEntry(entry);
+    _setData();
+  }
+
+  /// Adds all [entries].
+  ///
+  /// It calls [addEntry] for each entry.
   void addAll(List<Entry> entries) {
     for (final entry in entries) {
       _addEntry(entry);
@@ -326,11 +419,9 @@ class PeopleController extends ChangeNotifier {
     _setData();
   }
 
-  void addEntry(Entry entry) {
-    _addEntry(entry);
-    _setData();
-  }
-
+  /// Deletes [entry] from the list of entries of the person with the same name.
+  /// 
+  /// If the entry is the only one of the person, the person is deleted.
   void deleteEntry(Entry entry) {
     final Person person = people.firstWhere((p) => p.name == entry.person);
     if (person.entries.length == 1 && person.entries.first == entry) {
