@@ -1,6 +1,11 @@
 import 'package:debt/themes.dart';
 import 'package:flutter/material.dart';
 
+const _hiddenBorder = UnderlineInputBorder(
+  borderSide: BorderSide.none,
+  borderRadius: BorderRadius.all(Radius.circular(6)),
+);
+
 /// The input decoration used across the app.
 class DebtInputDecoration extends InputDecoration {
   DebtInputDecoration(
@@ -32,14 +37,8 @@ class DebtInputDecoration extends InputDecoration {
                   icon,
                   color: valid ? null : DebtColors.of(context).error,
                 ),
-          border: const UnderlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.all(Radius.circular(6)),
-          ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.all(Radius.circular(6)),
-          ),
+          border: _hiddenBorder,
+          focusedBorder: _hiddenBorder,
           errorText: valid ? null : errorText,
           errorStyle: TextStyle(color: DebtColors.of(context).error),
         );

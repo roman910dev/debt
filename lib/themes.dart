@@ -17,6 +17,7 @@ final ThemeData lightTheme = ThemeData(
   // fontFamily: iOSWeb
   //     ? '--apple-system'
   //     : null,
+  useMaterial3: false,
   cardColor: Colors.white,
   primaryTextTheme: TextTheme(
     displayLarge: _defaultStyle(),
@@ -74,6 +75,7 @@ final ThemeData darkTheme = ThemeData(
   // fontFamily: iOSWeb
   //     ? '-apple-system'
   //     : null,
+  useMaterial3: false,
   primaryTextTheme: TextTheme(
     displayLarge: _defaultStyle(),
     displayMedium: _defaultStyle(),
