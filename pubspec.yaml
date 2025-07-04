@@ -7,7 +7,7 @@ description: Light-weight app to track who owes and who you owe money to.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.5.0
+version: 1.5.4
 
 environment:
     sdk: ">=3.0.0 <4.0.0"
@@ -23,17 +23,17 @@ dependencies:
     flutter_svg: ^2.0.7
     url_launcher: ^6.0.20
     expressions: ^0.2.3
-    currency_formatter: ^2.1.0
+    currency_formatter: ^2.3.0
     collection: ^1.17.2
     flutter_lints: ^2.0.3
-    google_mobile_ads: ^3.0.0
+    google_mobile_ads: ^6.0.0
     share_plus: ^7.1.0
     material_symbols_icons: ^4.2668.0
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
-    msix: ^3.16.4
+    msix: ^3.16.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

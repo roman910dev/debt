@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace 'tk.roman910.debt'
-    compileSdk 33
+    compileSdk 35
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -49,10 +49,10 @@ android {
 
     defaultConfig {
         applicationId "tk.roman910.debt"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 34
-        versionCode 18
-        versionName '1.5.3'
+        minSdkVersion 23
+        targetSdkVersion 35
+        versionCode 19
+        versionName '1.5.4'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 //        ndk {
@@ -74,6 +74,9 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
+            ndk {
+                debugSymbolLevel = 'SYMBOL_TABLE'
+            }
         }
     }
     lint {
@@ -94,4 +97,3 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 }
 
-android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'
