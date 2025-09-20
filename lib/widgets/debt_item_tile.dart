@@ -174,11 +174,15 @@ class _DebtItemTileState extends State<DebtItemTile> {
               hoverColor: Colors.transparent,
               onTap: widget.item is Person
                   ? () => delay(200).then(
-                        (_) => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => EntryList(widget.item.text),
-                          ),
-                        ),
+                        (_) => {
+                          if (context.mounted)
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EntryList(widget.item.text),
+                              ),
+                            ),
+                        },
                       )
                   : null,
               onLongPress: _startSelection,
@@ -192,7 +196,8 @@ class _DebtItemTileState extends State<DebtItemTile> {
       duration: const Duration(milliseconds: 150),
       curve: Curves.ease,
       decoration: BoxDecoration(
-        color: DebtColors.of(context).itemBG.withOpacity(_enabled ? 1 : .5),
+        color:
+            DebtColors.of(context).itemBG.withValues(alpha: _enabled ? 1 : .5),
         border: Border.all(
           color: _selected ? DebtColors.of(context).border : Colors.transparent,
           width: 2,

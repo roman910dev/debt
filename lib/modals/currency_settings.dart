@@ -41,7 +41,7 @@ class _CustomCurrency extends StatelessWidget {
 
   Widget _buildSide(BuildContext context) => DropdownButtonFormField(
         decoration: DebtInputDecoration(context, labelText: 'Side'),
-        value: controller.value!.symbolSide,
+        initialValue: controller.value!.symbolSide,
         items: [
           for (final side in SymbolSide.values)
             DropdownMenuItem(
@@ -118,34 +118,43 @@ class _CurrencySettingsState extends State<_CurrencySettings> {
         ),
       );
 
-  Widget _radioTile(String title, CurrencyFormat? value) => RadioListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        title: Text(title),
-        value: value,
-        groupValue: widget.controller.value,
-        activeColor: Theme.of(context).colorScheme.secondary,
-        onChanged: (val) => setState(() => widget.controller.value = val),
-      );
-
-  Widget _buildSystemOption() => _radioTile('System', null);
-
-  Widget _buildCurrencyOption(int i) => _radioTile(
-        '${CurrencyFormatter.majorSymbols.keys.elementAt(i).toUpperCase()}  '
-        '[ ${CurrencyFormatter.majorSymbols.values.elementAt(i)} ]',
-        CurrencyFormatter.majors.values.elementAt(i),
+  Widget _buildSystemOption() => RadioGroup(
+        groupValue: widget.controller.value == null,
+        onChanged: (val) => setState(() => widget.controller.value = null),
+        child: RadioListTile(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          title: Text('System'),
+          value: true,
+          activeColor: Theme.of(context).colorScheme.secondary,
+        ),
       );
 
   @override
   Widget build(BuildContext context) => _customMode
       ? _CustomCurrency(widget.controller)
       : Expanded(
-          child: ListView.builder(
-            itemCount: CurrencyFormatter.majors.length + 2,
-            itemBuilder: (context, i) => i == 0
-                ? _buildCustomCurrencyButton()
-                : i == 1
-                    ? _buildSystemOption()
-                    : _buildCurrencyOption(i - 2),
+          child: RadioGroup(
+            groupValue: widget.controller.value,
+            onChanged: (val) => setState(() => widget.controller.value = val),
+            child: ListView.builder(
+              itemCount: CurrencyFormatter.majorsList.length + 2,
+              itemBuilder: (context, i) {
+                if (i == 0) return _buildCustomCurrencyButton();
+                if (i == 1) return _buildSystemOption();
+
+                final major = CurrencyFormatter.majorsList.elementAt(i - 2);
+                final code = major.code?.toUpperCase();
+                final symbol = major.symbol;
+                return RadioListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  title: Text('$code  [ $symbol ]'),
+                  value: major,
+                  activeColor: Theme.of(context).colorScheme.secondary,
+                );
+              },
+            ),
           ),
         );
 }

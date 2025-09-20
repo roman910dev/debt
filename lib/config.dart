@@ -122,7 +122,7 @@ abstract class DebtSettings {
       'currencySymbol',
       systemCurrency
           ? ''
-          : CurrencyFormatter.majors.values.contains(currency)
+          : CurrencyFormatter.majorsList.contains(currency)
               ? currency.symbol
               : '${currency.symbolSide.name[0]}${currency.symbol}',
     );
