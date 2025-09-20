@@ -238,11 +238,21 @@ extension People on List<Person> {
   List<List> toJson() => [for (final p in this) ...p.toList()]
       .sorted((a, b) => a[3].compareTo(b[3]));
 
-  List<Person> fromCsv(String data) =>
-      fromJson(CsvToListConverter().convert(data));
+  List<Person> fromCsv(String data) => fromJson(
+        CsvToListConverter()
+            .convert(data)
+            .map(
+              (e) => e
+                  .mapIndexed(
+                    // parse `checked` field as boolean
+                    (i, x) => i == 4 ? {'true': true, 'false': false}[x] : x,
+                  )
+                  .toList(),
+            )
+            .toList(),
+      );
 
-  String toCsv() =>
-      ListToCsvConverter(delimitAllFields: true).convert(toJson());
+  String toCsv() => ListToCsvConverter().convert(toJson());
 
   static Future<List<Entry>> load([SharedPreferences? prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
