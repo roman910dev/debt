@@ -7,14 +7,16 @@ import 'package:debt/modals/calculator_input_settings.dart';
 import 'package:debt/modals/currency_settings.dart';
 import 'package:debt/modals/hide_ads.dart';
 import 'package:debt/modals/theme_settings.dart';
+import 'package:debt/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// The options of the menu button.
 ///
 /// [prefs] is only available in dev mode.
-enum MenuOption { theme, currency, calculator, ads, about, prefs }
+enum MenuOption { theme, currency, calculator, ads, export, about, prefs }
 
 /// A button that opens a menu with options ([MenuOption]s).
 ///
@@ -55,6 +57,38 @@ class MenuButton extends StatelessWidget {
     return null;
   }
 
+  Future<bool?> _exportCSV(BuildContext context) async {
+    try {
+      final csvContent = people.people.toCsv();
+
+      final file = XFile.fromData(
+        utf8.encode(csvContent),
+        mimeType: 'text/csv',
+      );
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [file],
+          text: 'Debt Tracker Export',
+          subject: 'Debt Tracker Data Export',
+          fileNameOverrides: ['debt_export.csv'],
+        ),
+      );
+
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to export: $e'),
+            backgroundColor: DebtColors.of(context).error,
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) => PopupMenuButton<MenuOption>(
         itemBuilder: (context) => [
@@ -78,6 +112,10 @@ class MenuButton extends StatelessWidget {
               ),
             ),
           ],
+          const PopupMenuItem(
+            value: MenuOption.export,
+            child: Text('Export CSV'),
+          ),
           const PopupMenuItem(
             value: MenuOption.about,
             child: Text('About'),
@@ -103,6 +141,7 @@ class MenuButton extends StatelessWidget {
                 builder: (context) => CalculatorInputSettingsDialog(),
               ),
             MenuOption.ads => _handleAds(context),
+            MenuOption.export => _exportCSV(context),
             MenuOption.about => showModalBottomSheet(
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
