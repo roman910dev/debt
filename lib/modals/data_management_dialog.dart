@@ -63,6 +63,7 @@ class DataManagementDialog extends StatelessWidget {
         type: FileType.custom,
         allowedExtensions: ['csv'],
         allowMultiple: false,
+        withData: true,
       );
 
       if (result == null || result.files.isEmpty) return;
@@ -103,7 +104,7 @@ class DataManagementDialog extends StatelessWidget {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to import: $e'),
+          content: Text('Failed to import data'),
           backgroundColor: DebtColors.of(context).error,
         ),
       );
