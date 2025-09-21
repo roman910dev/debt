@@ -47,10 +47,14 @@ class AboutSheet extends StatelessWidget {
 
   Future<void> _onAction(String? uri) async {
     if (uri == null) {
-      Share.share(
-        'Hey! Check out this app. It helps me to keep track of my money.\n'
-        'https://play.google.com/store/apps/details?id=tk.roman910.debt',
-        subject: 'Debt Tracker',
+      SharePlus.instance.share(
+        ShareParams(
+          title: 'Debt Tracker',
+          subject: 'Debt Tracker',
+          text:
+              'Hey! Check out this app. It helps me to keep track of my money.\n'
+              'https://play.google.com/store/apps/details?id=tk.roman910.debt',
+        ),
       );
     } else {
       Uri? url = Uri.tryParse(uri);
@@ -75,7 +79,7 @@ class AboutSheet extends StatelessWidget {
                   borderRadius: const BorderRadius.all(Radius.circular(50)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(.16),
+                      color: Colors.black.withValues(alpha: .16),
                       offset: const Offset(0, -10),
                       blurRadius: 12,
                     ),

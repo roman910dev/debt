@@ -9,7 +9,8 @@ TextStyle _defaultStyle({Color? color, FontWeight? fontWeight}) => TextStyle(
       fontWeight: fontWeight,
       // iOS Web workaround
       decoration: DebtEnv.iOSWeb ? TextDecoration.underline : null,
-      decorationColor: DebtEnv.iOSWeb ? Colors.white.withOpacity(.01) : null,
+      decorationColor:
+          DebtEnv.iOSWeb ? Colors.white.withValues(alpha: .01) : null,
     );
 
 /// The light theme of the app.
@@ -42,7 +43,7 @@ final ThemeData lightTheme = ThemeData(
       fontWeight: FontWeight.w500,
     ),
     iconTheme: IconThemeData(color: Colors.green),
-    color: Colors.white,
+    backgroundColor: Colors.white,
   ),
   textTheme: TextTheme(
     displayLarge: _defaultStyle(),
@@ -124,7 +125,7 @@ final ThemeData darkTheme = ThemeData(
   ),
   brightness: Brightness.dark,
   colorScheme: ColorScheme.fromSwatch(
-    primarySwatch: MaterialColor(Colors.green[200]!.value, const {}),
+    primarySwatch: MaterialColor(Colors.green[200]!.toARGB32(), const {}),
     accentColor: Colors.green[200],
     brightness: Brightness.dark,
     errorColor: Colors.red[200],
@@ -160,7 +161,7 @@ class DebtDarkColors extends DebtColors {
   @override
   final Color border = Colors.white60;
   @override
-  final Color background = Colors.black.withOpacity(.1);
+  final Color background = Colors.black.withValues(alpha: .1);
   @override
   Color get itemBG => Theme.of(_context).cardColor;
 
@@ -175,7 +176,7 @@ class DebtLightColors extends DebtColors {
   @override
   final Color border = Colors.black54;
   @override
-  final Color background = Colors.black.withOpacity(.05);
+  final Color background = Colors.black.withValues(alpha: .05);
   @override
   final Color itemBG = const Color(0xfff2f2f2);
 

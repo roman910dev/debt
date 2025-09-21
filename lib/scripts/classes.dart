@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:csv/csv.dart';
 import 'package:debt/config.dart';
 import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
@@ -237,10 +238,21 @@ extension People on List<Person> {
   List<List> toJson() => [for (final p in this) ...p.toList()]
       .sorted((a, b) => a[3].compareTo(b[3]));
 
-  String toCSV() => toJson().map((e) {
-        e[3] = DebtDateTime.fromSecondsSinceEpoch(e[3]).toFormattedString();
-        return e.join(',');
-      }).join('\n');
+  List<Person> fromCsv(String data) => fromJson(
+        CsvToListConverter()
+            .convert(data)
+            .map(
+              (e) => e
+                  .mapIndexed(
+                    // parse `checked` field as boolean
+                    (i, x) => i == 4 ? {'true': true, 'false': false}[x] : x,
+                  )
+                  .toList(),
+            )
+            .toList(),
+      );
+
+  String toCsv() => ListToCsvConverter().convert(toJson());
 
   static Future<List<Entry>> load([SharedPreferences? prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
@@ -420,7 +432,7 @@ class PeopleController extends ChangeNotifier {
   }
 
   /// Deletes [entry] from the list of entries of the person with the same name.
-  /// 
+  ///
   /// If the entry is the only one of the person, the person is deleted.
   void deleteEntry(Entry entry) {
     final Person person = people.firstWhere((p) => p.name == entry.person);

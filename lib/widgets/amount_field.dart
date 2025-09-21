@@ -69,7 +69,7 @@ class AmountField extends StatefulWidget {
 }
 
 class _AmountFieldState extends State<AmountField> {
-  void _onChanged(val) {
+  void _onChanged(String val) {
     try {
       if (val.trim() == '-') {
         // if the user enters a negative sign, toggle the sign instead of setting the text to '-'
@@ -142,7 +142,7 @@ class _AmountFieldState extends State<AmountField> {
         decoration: BoxDecoration(
           color: widget.controller.valid
               ? DebtColors.of(context).background
-              : Theme.of(context).colorScheme.error.withOpacity(.1),
+              : Theme.of(context).colorScheme.error.withValues(alpha: .1),
           borderRadius: const BorderRadius.all(Radius.circular(6)),
         ),
         child: Row(

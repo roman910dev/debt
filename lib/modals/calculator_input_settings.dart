@@ -35,7 +35,7 @@ class _CalculatorSwitchState extends State<_CalculatorSwitch> {
               const SizedBox(width: 8),
               Switch(
                 value: widget.controller.value,
-                activeColor: Theme.of(context).colorScheme.secondary,
+                activeThumbColor: Theme.of(context).colorScheme.secondary,
                 onChanged: (val) =>
                     setState(() => widget.controller.value = val),
               ),

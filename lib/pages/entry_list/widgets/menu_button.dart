@@ -5,6 +5,7 @@ import 'package:debt/scripts/classes.dart';
 import 'package:debt/modals/about.dart';
 import 'package:debt/modals/calculator_input_settings.dart';
 import 'package:debt/modals/currency_settings.dart';
+import 'package:debt/modals/data_management_dialog.dart';
 import 'package:debt/modals/hide_ads.dart';
 import 'package:debt/modals/theme_settings.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The options of the menu button.
 ///
 /// [prefs] is only available in dev mode.
-enum MenuOption { theme, currency, calculator, ads, about, prefs }
+enum MenuOption { theme, currency, calculator, ads, data, about, prefs }
 
 /// A button that opens a menu with options ([MenuOption]s).
 ///
@@ -55,6 +56,14 @@ class MenuButton extends StatelessWidget {
     return null;
   }
 
+  Future<bool?> _showDataManagement(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => const DataManagementDialog(),
+    );
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) => PopupMenuButton<MenuOption>(
         itemBuilder: (context) => [
@@ -78,6 +87,10 @@ class MenuButton extends StatelessWidget {
               ),
             ),
           ],
+          const PopupMenuItem(
+            value: MenuOption.data,
+            child: Text('Export / Import'),
+          ),
           const PopupMenuItem(
             value: MenuOption.about,
             child: Text('About'),
@@ -103,6 +116,7 @@ class MenuButton extends StatelessWidget {
                 builder: (context) => CalculatorInputSettingsDialog(),
               ),
             MenuOption.ads => _handleAds(context),
+            MenuOption.data => _showDataManagement(context),
             MenuOption.about => showModalBottomSheet(
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,

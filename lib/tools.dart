@@ -29,7 +29,7 @@ class DebtInputDecoration extends InputDecoration {
                 ),
           fillColor: valid
               ? DebtColors.of(context).background
-              : DebtColors.of(context).error.withOpacity(.1),
+              : DebtColors.of(context).error.withValues(alpha: .1),
           hoverColor: Colors.transparent,
           prefixIcon: icon == null
               ? null

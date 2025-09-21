@@ -17,20 +17,22 @@ class ThemeSettingsDialog extends StatelessWidget {
         builder: (context, setState) => Container(
           width: double.maxFinite,
           constraints: const BoxConstraints(maxHeight: 150),
-          child: ListView.builder(
-            itemCount: ThemeMode.values.length,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, i) => RadioListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+          child: RadioGroup(
+            groupValue: option,
+            onChanged: (val) {
+              if (val != null) setState(() => option = val);
+            },
+            child: ListView.builder(
+              itemCount: ThemeMode.values.length,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, i) => RadioListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                title: Text(ThemeMode.values[i].name.toFirstUpperCase()),
+                value: ThemeMode.values[i],
+                activeColor: Theme.of(context).colorScheme.secondary,
               ),
-              title: Text(ThemeMode.values[i].name.toFirstUpperCase()),
-              value: ThemeMode.values[i],
-              groupValue: option,
-              activeColor: Theme.of(context).colorScheme.secondary,
-              onChanged: (val) {
-                if (val != null) setState(() => option = val);
-              },
             ),
           ),
         ),

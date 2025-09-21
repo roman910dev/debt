@@ -22,30 +22,31 @@ linter:
     # `// ignore_for_file: name_of_lint` syntax on the line or in the file
     # producing the lint.
     rules:
-        - always_use_package_imports
-        - prefer_single_quotes
-        - avoid_bool_literals_in_conditional_expressions
-        - avoid_unused_constructor_parameters
-        - cascade_invocations
-        - flutter_style_todos 
-        - join_return_with_assignment 
-        - leading_newlines_in_multiline_strings
-        - missing_whitespace_between_adjacent_strings 
-        - prefer_expression_function_bodies
-        - prefer_if_elements_to_conditional_expressions
-        - prefer_int_literals
-        - prefer_null_aware_method_calls
-        - require_trailing_commas
-        - unnecessary_await_in_return
-        - unnecessary_breaks
-        - unnecessary_lambdas 
-        - unnecessary_parenthesis 
-        - unnecessary_raw_strings 
-        - unnecessary_to_list_in_spreads
-        - use_colored_box
-        - use_decorated_box
-        - use_named_constants 
-        - use_super_parameters
+        always_use_package_imports: true
+        prefer_single_quotes: true
+        avoid_bool_literals_in_conditional_expressions: true
+        avoid_unused_constructor_parameters: true
+        cascade_invocations: true
+        flutter_style_todos: true
+        join_return_with_assignment: true
+        leading_newlines_in_multiline_strings: true
+        missing_whitespace_between_adjacent_strings: true
+        prefer_expression_function_bodies: true
+        prefer_if_elements_to_conditional_expressions: true
+        prefer_int_literals: true
+        prefer_null_aware_method_calls: true
+        require_trailing_commas: true
+        unnecessary_await_in_return: true
+        unnecessary_breaks: true
+        unnecessary_lambdas: true
+        unnecessary_parenthesis: true
+        unnecessary_raw_strings: true
+        unnecessary_to_list_in_spreads: true
+        use_colored_box: true
+        use_decorated_box: true
+        use_named_constants: true
+        use_super_parameters: true
+        curly_braces_in_flow_control_structures: false
         # - package_api_docs
         # - use_string_buffers
 # Additional information about this file can be found at

@@ -43,7 +43,7 @@ class SelectionController<DebtItem> extends ChangeNotifier {
       isSelected(item) ? unSelect(item) : select(item);
 
   /// Clears the selection.
-  clear() {
+  void clear() {
     _set.clear();
     notifyListeners();
   }
