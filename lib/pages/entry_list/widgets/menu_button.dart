@@ -5,28 +5,17 @@ import 'package:debt/scripts/classes.dart';
 import 'package:debt/modals/about.dart';
 import 'package:debt/modals/calculator_input_settings.dart';
 import 'package:debt/modals/currency_settings.dart';
+import 'package:debt/modals/data_management_dialog.dart';
 import 'package:debt/modals/hide_ads.dart';
 import 'package:debt/modals/theme_settings.dart';
-import 'package:debt/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:file_picker/file_picker.dart';
 
 /// The options of the menu button.
 ///
 /// [prefs] is only available in dev mode.
-enum MenuOption {
-  theme,
-  currency,
-  calculator,
-  ads,
-  export,
-  import,
-  about,
-  prefs
-}
+enum MenuOption { theme, currency, calculator, ads, data, about, prefs }
 
 /// A button that opens a menu with options ([MenuOption]s).
 ///
@@ -67,100 +56,12 @@ class MenuButton extends StatelessWidget {
     return null;
   }
 
-  Future<bool?> _exportCSV(BuildContext context) async {
-    try {
-      final csvContent = people.people.toCsv();
-
-      final file = XFile.fromData(
-        utf8.encode(csvContent),
-        mimeType: 'text/csv',
-      );
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [file],
-          text: 'Debt Tracker Export',
-          subject: 'Debt Tracker Data Export',
-          fileNameOverrides: ['debt_export.csv'],
-        ),
-      );
-
-      return true;
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to export: $e'),
-            backgroundColor: DebtColors.of(context).error,
-          ),
-        );
-      }
-      return false;
-    }
-  }
-
-  Future<bool?> _importCSV(BuildContext context) async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['csv'],
-        allowMultiple: false,
-      );
-
-      if (result == null || result.files.isEmpty) return false;
-
-      final file = result.files.first;
-      final csvContent = utf8.decode(file.bytes!);
-      final importedPeople = people.people.fromCsv(csvContent);
-      final entries = importedPeople.expand((p) => p.entries).toList();
-
-      if (!context.mounted) return false;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Import CSV'),
-          content: Text(
-            'Found ${entries.length} entries from ${importedPeople.length} people to import.\n\n'
-            'This will add the imported entries to your existing data.\n\n'
-            'Do you want to continue?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Import'),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return false;
-
-      people.addAll(entries);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully imported ${entries.length} entries'),
-            backgroundColor: DebtColors.of(context).accent,
-          ),
-        );
-      }
-
-      return true;
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to import: $e'),
-            backgroundColor: DebtColors.of(context).error,
-          ),
-        );
-      }
-      return false;
-    }
+  Future<bool?> _showDataManagement(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => const DataManagementDialog(),
+    );
+    return true;
   }
 
   @override
@@ -187,12 +88,8 @@ class MenuButton extends StatelessWidget {
             ),
           ],
           const PopupMenuItem(
-            value: MenuOption.export,
-            child: Text('Export CSV'),
-          ),
-          const PopupMenuItem(
-            value: MenuOption.import,
-            child: Text('Import CSV'),
+            value: MenuOption.data,
+            child: Text('Export / Import'),
           ),
           const PopupMenuItem(
             value: MenuOption.about,
@@ -219,8 +116,7 @@ class MenuButton extends StatelessWidget {
                 builder: (context) => CalculatorInputSettingsDialog(),
               ),
             MenuOption.ads => _handleAds(context),
-            MenuOption.export => _exportCSV(context),
-            MenuOption.import => _importCSV(context),
+            MenuOption.data => _showDataManagement(context),
             MenuOption.about => showModalBottomSheet(
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,

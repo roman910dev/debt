@@ -34,6 +34,9 @@ class DebtDialog extends StatelessWidget {
   /// The maximum width of the dialog.
   final double maxWidth;
 
+  /// The text of the ok button. Displayed only if [onAction] is not provided.
+  final String defaultAction;
+
   const DebtDialog({
     super.key,
     required this.title,
@@ -43,6 +46,7 @@ class DebtDialog extends StatelessWidget {
     required this.content,
     this.error,
     this.maxWidth = 740,
+    this.defaultAction = 'Ok',
   });
 
   Widget _buildTitle(BuildContext context) => Text(
@@ -66,7 +70,7 @@ class DebtDialog extends StatelessWidget {
           foregroundColor: DebtColors.of(context).accent,
         ),
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Ok'),
+        child: Text(defaultAction),
       );
 
   Widget _buildCancelButton(BuildContext context) => TextButton(
