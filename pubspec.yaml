@@ -31,7 +31,7 @@ dependencies:
     material_symbols_icons: ^4.2668.0
     cross_file: ^0.3.4+2
     csv: ^6.0.0
-    file_picker: ^8.0.0+1
+    file_picker: ^10.3.7
 
 dev_dependencies:
     flutter_test:
