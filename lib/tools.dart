@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:debt/themes.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 const _hiddenBorder = UnderlineInputBorder(
   borderSide: BorderSide.none,
@@ -58,14 +61,24 @@ extension DebtDateTime on DateTime {
   static DateTime fromSecondsSinceEpoch(int seconds) =>
       DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
 
-  /// DD/MM/YYYY.
-  String toFormattedString() => ''
+  /// In the local `yMd` format.
+  String toFormattedString() =>
+      DateFormat.yMd(PlatformDispatcher.instance.locale.toLanguageTag())
+          .format(this);
+
+  @Deprecated('Use [toFormattedString] instead.')
+  String toFormattedStringLegacy() => ''
       '${day.toString().padLeft(2, '0')}/'
       '${month.toString().padLeft(2, '0')}/'
       '${year.toString().padLeft(4, '0')}';
 
   /// Parses a string in the format DD/MM/YYYY.
-  static DateTime parse(String date) => DateTime(
+  static DateTime parse(String date) =>
+      DateFormat.yMd(PlatformDispatcher.instance.locale.toLanguageTag())
+          .parse(date);
+
+  @Deprecated('Use [parse] instead.')
+  static DateTime parseLegacy(String date) => DateTime(
         int.parse(date.split('/')[2]),
         int.parse(date.split('/')[1]),
         int.parse(date.split('/')[0]),

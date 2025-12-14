@@ -32,6 +32,8 @@ dependencies:
     cross_file: ^0.3.4+2
     csv: ^6.0.0
     file_picker: ^10.3.7
+    flutter_localizations:
+        sdk: flutter
 
 dev_dependencies:
     flutter_test:
