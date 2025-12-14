@@ -51,8 +51,8 @@ android {
         applicationId "tk.roman910.debt"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 35
-        versionCode 20
-        versionName '1.6.0'
+        versionCode 21
+        versionName '1.6.1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 //        ndk {
