@@ -123,7 +123,7 @@ class Entry extends DebtItem {
           money: num.parse(data.split('~|~')[0]),
           person: data.split('~|~')[1],
           description: data.split('~|~')[2],
-          date: DebtDateTime.parse(data.split('~|~')[3]),
+          date: DebtDateTime.parseLegacy(data.split('~|~')[3]),
           checked: checked,
         );
 
