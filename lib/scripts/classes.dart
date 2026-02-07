@@ -77,6 +77,9 @@ class Entry extends DebtItem {
   @override
   final bool checked;
 
+  /// Optional running total used for UI display in person entry lists.
+  final num? cumulativeMoney;
+
   /// The [description] of the entry.
   @override
   String get text => description;
@@ -87,6 +90,7 @@ class Entry extends DebtItem {
     required this.money,
     required this.date,
     this.checked = false,
+    this.cumulativeMoney,
   });
 
   Entry _copyWith({
@@ -95,6 +99,7 @@ class Entry extends DebtItem {
     num? money,
     DateTime? date,
     bool? checked,
+    num? cumulativeMoney,
   }) =>
       Entry(
         person: person ?? this.person,
@@ -102,6 +107,7 @@ class Entry extends DebtItem {
         money: money ?? this.money,
         date: date ?? this.date,
         checked: checked ?? this.checked,
+        cumulativeMoney: cumulativeMoney ?? this.cumulativeMoney,
       );
 
   @override
@@ -117,6 +123,9 @@ class Entry extends DebtItem {
 
   @override
   Entry rename(String personName) => _copyWith(person: personName);
+
+  Entry withCumulativeMoney(num? cumulativeMoney) =>
+      _copyWith(cumulativeMoney: cumulativeMoney);
 
   Entry._legacyParse(String data, {bool checked = false})
       : this(
@@ -202,6 +211,31 @@ class Person extends DebtItem {
 
   @override
   List<List> toList() => [for (final e in entries) e.toList()];
+}
+
+extension Entries on Iterable<Entry> {
+  /// Returns entries preserving list order while assigning cumulative values
+  /// to active entries, computed from oldest to newest.
+  List<Entry> get withCumulative {
+    final entries = toList();
+    final cumulativeByIndex = <int, num>{};
+
+    final activeIndexes = [
+      for (int i = 0; i < entries.length; i++)
+        if (!entries[i].checked) i,
+    ]..sort((a, b) => entries[a].date.compareTo(entries[b].date));
+
+    num cumulative = 0;
+    for (final index in activeIndexes) {
+      cumulative += entries[index].money;
+      cumulativeByIndex[index] = cumulative;
+    }
+
+    return [
+      for (int i = 0; i < entries.length; i++)
+        entries[i].withCumulativeMoney(cumulativeByIndex[i]),
+    ];
+  }
 }
 
 extension DebtItems on Iterable<DebtItem> {

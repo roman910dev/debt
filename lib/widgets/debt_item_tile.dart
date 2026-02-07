@@ -17,14 +17,10 @@ class DebtItemTile extends StatefulWidget {
   /// Used to know if the item is selected.
   final SelectionController<DebtItem> selection;
 
-  /// Optional cumulative money shown for active entries in a muted style.
-  final num? cumulativeMoney;
-
   const DebtItemTile({
     super.key,
     required this.item,
     required this.selection,
-    this.cumulativeMoney,
   });
 
   @override
@@ -114,11 +110,11 @@ class _DebtItemTileState extends State<DebtItemTile> {
         ),
       );
 
-  Widget _buildCumulativeMoney() => Text(
+  Widget _buildCumulativeMoney(num cumulativeMoney) => Text(
         CurrencyFormatter.format(
-          widget.cumulativeMoney!,
+          cumulativeMoney,
           DebtSettings.currency,
-          compact: widget.cumulativeMoney! >= 100,
+          compact: cumulativeMoney >= 100,
           decimal: 2,
         ),
         style: TextStyle(
@@ -157,6 +153,10 @@ class _DebtItemTileState extends State<DebtItemTile> {
 
   @override
   Widget build(BuildContext context) {
+    final cumulativeMoney = widget.item is Entry
+        ? (widget.item as Entry).cumulativeMoney
+        : null;
+
     Widget content = Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -174,9 +174,9 @@ class _DebtItemTileState extends State<DebtItemTile> {
           ),
           const SizedBox(height: 8),
           _buildDate(),
-          if (widget.cumulativeMoney != null) ...[
+          if (cumulativeMoney != null) ...[
             const SizedBox(height: 4),
-            _buildCumulativeMoney(),
+            _buildCumulativeMoney(cumulativeMoney),
           ],
         ],
       ),

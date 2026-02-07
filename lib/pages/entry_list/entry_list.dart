@@ -29,9 +29,6 @@ class EntryListState extends State<EntryList> {
   /// The list of items in the page.
   List<DebtItem> _items = [];
 
-  /// Cumulative debt values for entry rows at matching indexes in [_items].
-  List<num?> _cumulativeValues = [];
-
   /// The banner ad displayed at the bottom of the page.
   /// If ads are disabled or not yet loaded, this will be `null`.
   BannerAd? _bannerAd;
@@ -52,23 +49,8 @@ class EntryListState extends State<EntryList> {
         if (widget.personName != null && _items.isEmpty) Navigator.pop(context);
         _items = _items.debtSorted;
 
-        _cumulativeValues = List<num?>.filled(_items.length, null);
-
         if (widget.personName != null) {
-          final activeIndexes = [
-            for (int i = 0; i < _items.length; i++)
-              if (_items[i] is Entry && !_items[i].checked) i,
-          ]
-            ..sort(
-              (a, b) =>
-                  (_items[a] as Entry).date.compareTo((_items[b] as Entry).date),
-            );
-
-          num cumulative = 0;
-          for (final i in activeIndexes) {
-            cumulative += (_items[i] as Entry).money;
-            _cumulativeValues[i] = cumulative;
-          }
+          _items = _items.cast<Entry>().withCumulative.cast();
         }
       });
 
@@ -110,11 +92,7 @@ class EntryListState extends State<EntryList> {
   Widget _buildBalance() => Balance(selection: _selection, items: _items);
 
   Widget _buildItem(int i) =>
-      DebtItemTile(
-        item: _items[i - 1],
-        selection: _selection,
-        cumulativeMoney: _cumulativeValues[i - 1],
-      );
+      DebtItemTile(item: _items[i - 1], selection: _selection);
 
   @override
   Widget build(BuildContext context) => Scaffold(
