@@ -9,6 +9,10 @@ description: Light-weight app to track who owes and who you owe money to.
 # Read more about versioning at semver.org.
 version: 1.6.0
 
+homepage: https://github.com/roman910dev/debt
+repository: https://github.com/roman910dev/debt
+issue_tracker: https://github.com/roman910dev/debt/issues
+
 environment:
     sdk: ">=3.0.0 <4.0.0"
 
