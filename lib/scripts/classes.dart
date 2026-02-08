@@ -7,6 +7,12 @@ import 'package:debt/tools.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Helper class to provide nullable values to optional parameters.
+class Nullable<T> {
+  final T? value;
+  const Nullable(this.value);
+}
+
 /// An immutable abstract class representing a debt item.
 ///
 /// This is the parent class of [Entry] and [Person].
@@ -99,7 +105,7 @@ class Entry extends DebtItem {
     num? money,
     DateTime? date,
     bool? checked,
-    num? cumulativeMoney,
+    Nullable<num>? cumulativeMoney,
   }) =>
       Entry(
         person: person ?? this.person,
@@ -107,7 +113,9 @@ class Entry extends DebtItem {
         money: money ?? this.money,
         date: date ?? this.date,
         checked: checked ?? this.checked,
-        cumulativeMoney: cumulativeMoney ?? this.cumulativeMoney,
+        cumulativeMoney: cumulativeMoney == null
+            ? this.cumulativeMoney
+            : cumulativeMoney.value,
       );
 
   @override
@@ -124,7 +132,7 @@ class Entry extends DebtItem {
   @override
   Entry rename(String personName) => _copyWith(person: personName);
 
-  Entry withCumulativeMoney(num? cumulativeMoney) =>
+  Entry withCumulativeMoney(Nullable<num>? cumulativeMoney) =>
       _copyWith(cumulativeMoney: cumulativeMoney);
 
   Entry._legacyParse(String data, {bool checked = false})
@@ -217,23 +225,24 @@ extension Entries on Iterable<Entry> {
   /// Returns entries preserving list order while assigning cumulative values
   /// to active entries, computed from oldest to newest.
   List<Entry> get withCumulative {
-    final entries = toList();
+    final entries = debtSorted.cast<Entry>().toList();
     final cumulativeByIndex = <int, num>{};
 
     final activeIndexes = [
       for (int i = 0; i < entries.length; i++)
         if (!entries[i].checked) i,
-    ]..sort((a, b) => entries[a].date.compareTo(entries[b].date));
+    ];
 
     num cumulative = 0;
-    for (final index in activeIndexes) {
+    for (final index in activeIndexes.reversed) {
+      if (activeIndexes.length == 1) break;
       cumulative += entries[index].money;
       cumulativeByIndex[index] = cumulative;
     }
 
     return [
       for (int i = 0; i < entries.length; i++)
-        entries[i].withCumulativeMoney(cumulativeByIndex[i]),
+        entries[i].withCumulativeMoney(Nullable(cumulativeByIndex[i])),
     ];
   }
 }
