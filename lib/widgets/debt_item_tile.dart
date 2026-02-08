@@ -118,8 +118,9 @@ class _DebtItemTileState extends State<DebtItemTile> {
           decimal: 2,
         ),
         style: TextStyle(
+          fontWeight: FontWeight.w600,
           color: _enabled
-              ? DebtColors.of(context).text.withValues(alpha: .6)
+              ? DebtColors.of(context).text.withValues(alpha: .38)
               : DebtColors.of(context).disabled,
           fontSize: 12,
         ),
@@ -173,11 +174,17 @@ class _DebtItemTileState extends State<DebtItemTile> {
             ],
           ),
           const SizedBox(height: 8),
-          _buildDate(),
-          if (cumulativeMoney != null) ...[
-            const SizedBox(height: 4),
-            _buildCumulativeMoney(cumulativeMoney),
-          ],
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildDate(),
+              if (_enabled && cumulativeMoney != null) ...[
+                const SizedBox(width: 4),
+                _buildCumulativeMoney(cumulativeMoney),
+              ],
+            ],
+          ),
         ],
       ),
     );
