@@ -17,7 +17,11 @@ class DebtItemTile extends StatefulWidget {
   /// Used to know if the item is selected.
   final SelectionController<DebtItem> selection;
 
-  const DebtItemTile({super.key, required this.item, required this.selection});
+  const DebtItemTile({
+    super.key,
+    required this.item,
+    required this.selection,
+  });
 
   @override
   State<DebtItemTile> createState() => _DebtItemTileState();
@@ -57,6 +61,13 @@ class _DebtItemTileState extends State<DebtItemTile> {
     super.dispose();
   }
 
+  String _formatMoney(num money) => CurrencyFormatter.format(
+        money,
+        DebtSettings.currency,
+        compact: money >= 100,
+        decimal: 2,
+      );
+
   Widget _buildTitle() => Text(
         widget.item.text,
         style: widget.item is Person
@@ -79,12 +90,7 @@ class _DebtItemTileState extends State<DebtItemTile> {
   Widget _buildMoney(num money) => widget.item is Person && widget.item.checked
       ? const SizedBox()
       : Text(
-          CurrencyFormatter.format(
-            money,
-            DebtSettings.currency,
-            compact: money >= 100,
-            decimal: 2,
-          ),
+          _formatMoney(money),
           textAlign: TextAlign.end,
           style: TextStyle(
             color: _enabled
@@ -102,6 +108,16 @@ class _DebtItemTileState extends State<DebtItemTile> {
         style: TextStyle(
           color: _enabled
               ? DebtColors.of(context).text
+              : DebtColors.of(context).disabled,
+        ),
+      );
+
+  Widget _buildCumulativeMoney(num cumulativeMoney) => Text(
+        _formatMoney(cumulativeMoney),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: _enabled
+              ? DebtColors.of(context).text.withValues(alpha: .38)
               : DebtColors.of(context).disabled,
         ),
       );
@@ -134,6 +150,9 @@ class _DebtItemTileState extends State<DebtItemTile> {
 
   @override
   Widget build(BuildContext context) {
+    final cumulativeMoney =
+        widget.item is Entry ? (widget.item as Entry).cumulativeMoney : null;
+
     Widget content = Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -150,7 +169,17 @@ class _DebtItemTileState extends State<DebtItemTile> {
             ],
           ),
           const SizedBox(height: 8),
-          _buildDate(),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildDate(),
+              if (_enabled && cumulativeMoney != null) ...[
+                const SizedBox(width: 4),
+                _buildCumulativeMoney(cumulativeMoney),
+              ],
+            ],
+          ),
         ],
       ),
     );
