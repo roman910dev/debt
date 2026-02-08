@@ -39,19 +39,21 @@ class EntryListState extends State<EntryList> {
 
   /// Gets and sorts [_items].
   void _listener() => setState(() {
-        _items = widget.personName == null
+        final isPersonList = widget.personName != null;
+
+        _items = !isPersonList
             ? people.people.cast()
             : (people.people
                         .firstWhereOrNull((p) => p.text == widget.personName)
                         ?.entries ??
                     [])
                 .cast();
-        if (widget.personName != null && _items.isEmpty) Navigator.pop(context);
-        _items = _items.debtSorted;
 
-        if (widget.personName != null) {
-          _items = _items.cast<Entry>().withCumulative.cast();
-        }
+        if (isPersonList && _items.isEmpty) Navigator.pop(context);
+
+        _items = isPersonList
+            ? _items.cast<Entry>().withCumulative.cast()
+            : _items.debtSorted;
       });
 
   void _loadAd() {

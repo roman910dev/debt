@@ -61,6 +61,13 @@ class _DebtItemTileState extends State<DebtItemTile> {
     super.dispose();
   }
 
+  String _formatMoney(num money) => CurrencyFormatter.format(
+        money,
+        DebtSettings.currency,
+        compact: money >= 100,
+        decimal: 2,
+      );
+
   Widget _buildTitle() => Text(
         widget.item.text,
         style: widget.item is Person
@@ -83,12 +90,7 @@ class _DebtItemTileState extends State<DebtItemTile> {
   Widget _buildMoney(num money) => widget.item is Person && widget.item.checked
       ? const SizedBox()
       : Text(
-          CurrencyFormatter.format(
-            money,
-            DebtSettings.currency,
-            compact: money >= 100,
-            decimal: 2,
-          ),
+          _formatMoney(money),
           textAlign: TextAlign.end,
           style: TextStyle(
             color: _enabled
@@ -111,18 +113,12 @@ class _DebtItemTileState extends State<DebtItemTile> {
       );
 
   Widget _buildCumulativeMoney(num cumulativeMoney) => Text(
-        CurrencyFormatter.format(
-          cumulativeMoney,
-          DebtSettings.currency,
-          compact: cumulativeMoney >= 100,
-          decimal: 2,
-        ),
+        _formatMoney(cumulativeMoney),
         style: TextStyle(
           fontWeight: FontWeight.w600,
           color: _enabled
               ? DebtColors.of(context).text.withValues(alpha: .38)
               : DebtColors.of(context).disabled,
-          fontSize: 12,
         ),
       );
 
@@ -154,9 +150,8 @@ class _DebtItemTileState extends State<DebtItemTile> {
 
   @override
   Widget build(BuildContext context) {
-    final cumulativeMoney = widget.item is Entry
-        ? (widget.item as Entry).cumulativeMoney
-        : null;
+    final cumulativeMoney =
+        widget.item is Entry ? (widget.item as Entry).cumulativeMoney : null;
 
     Widget content = Padding(
       padding: const EdgeInsets.all(16),
