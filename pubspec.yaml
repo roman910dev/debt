@@ -7,7 +7,11 @@ description: Light-weight app to track who owes and who you owe money to.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.6.0
+version: 1.7.0
+
+homepage: https://github.com/roman910dev/debt
+repository: https://github.com/roman910dev/debt
+issue_tracker: https://github.com/roman910dev/debt/issues
 
 environment:
     sdk: ">=3.0.0 <4.0.0"
