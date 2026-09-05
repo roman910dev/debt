@@ -59,17 +59,16 @@ class DataManagementDialog extends StatelessWidget {
 
   Future<void> _importData(BuildContext context) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
-        allowMultiple: false,
-        withData: true,
       );
 
-      if (result == null || result.files.isEmpty) return;
+      if (result.isEmpty) return;
 
-      final file = result.files.first;
-      final csvContent = utf8.decode(file.bytes!);
+      final file = result.first;
+      final bytes = await file.readAsBytes();
+      final csvContent = utf8.decode(bytes);
       final importedPeople = people.people.fromCsv(csvContent);
       final entries = importedPeople.expand((p) => p.entries).toList();
 
