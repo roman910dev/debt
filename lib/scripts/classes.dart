@@ -282,8 +282,8 @@ extension People on List<Person> {
       .sorted((a, b) => a[3].compareTo(b[3]));
 
   List<Person> fromCsv(String data) => fromJson(
-        CsvToListConverter()
-            .convert(data)
+        csv
+            .decode(data)
             .map(
               (e) => e
                   .mapIndexed(
@@ -295,7 +295,7 @@ extension People on List<Person> {
             .toList(),
       );
 
-  String toCsv() => ListToCsvConverter().convert(toJson());
+  String toCsv() => csv.encode(toJson());
 
   static Future<List<Entry>> load([SharedPreferences? prefs]) async {
     prefs ??= await SharedPreferences.getInstance();
